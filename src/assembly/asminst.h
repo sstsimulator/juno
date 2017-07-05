@@ -61,6 +61,45 @@ protected:
 	uint16_t reg;
 };
 
+class JunoLiteralOperand : public JunoOperand {
+public:
+	JunoLiteralOperand(const int64_t literal) :
+		JunoOperand(), val(literal) {}
+
+	JunoLiteralOperand(const char* litStr) :
+		JunoOperand() {
+
+		if(strlen(litStr) == 0) {
+			fprintf(stderr, "Error: literal value is empty.\n");
+			exit(-1);
+		}
+
+		if(strlen(litStr) == 1) {
+			fprintf(stderr, "Error: literal value is not long enough!\n");
+			exit(-1);
+		}
+
+		if( '$' != litStr[0] ) {
+			fprintf(stderr, "Error: literal value does not start with a $\n");
+			exit(-1);
+		}
+
+		char* literalValue = (char*) malloc( sizeof(char) * 128 );
+		for(int i = 1; i < 128; ++i) {
+			literalValue[i-1] = litStr[i];
+		}
+
+		val = static_cast<int64_t>( std::atoll(literalValue) );
+		printf("Literal: %" PRId64 "\n", val);
+	}
+
+	JunoOperandType getType() { return LITERAL_OPERAND; }
+	int64_t getLiteral() { return val; }
+
+protected:
+	int64_t val;
+};
+
 class JunoMemoryOperand : public JunoOperand {
 public:
 	JunoMemoryOperand(const uint64_t address) :

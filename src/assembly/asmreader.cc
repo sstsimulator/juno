@@ -81,6 +81,7 @@ void AssemblyReader::assemble() {
 					} else if( op[0] == '$' ) {
 						// Literal?
 						printf("Making a literal from: %s\n", op);
+						newInst->addOperand( new JunoLiteralOperand( op ) );
 					} else {
 						printf("Making a memory from: %s\n", op);
 						newInst->addOperand( new JunoMemoryOperand( op ) );
