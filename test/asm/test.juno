@@ -1,0 +1,7 @@
+ADD r1 r2
+DIV r2 r4
+ADD r2 r2
+XOR r4 r4
+LOAD $12345 r1
+STORE r1 $12345
+
