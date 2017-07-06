@@ -25,9 +25,15 @@ public:
 		return program;
 	}
 
+	std::map<std::string, int64_t>& getLabelMap() {
+		return labelMap;
+	}
+
 protected:
 	bool readLine(char* buffer, const int buffLen);
 	FILE* progFile;
+
+	std::map<std::string, int64_t> labelMap;
 	std::vector<int64_t> literals;
 	std::vector<JunoInstruction*> instructions;
 	std::vector<uint8_t> program;

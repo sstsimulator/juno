@@ -4,6 +4,13 @@
 #include <sst/core/component.h>
 #include <sst/core/elementinfo.h>
 
+#include "assembly/asmreader.h"
+
+using namespace SST::Juno;
+
+namespace SST {
+namespace Juno {
+
 class JunoCPU : public SST::Component {
 
 public:
@@ -26,10 +33,12 @@ public:
 
 	SST_ELI_DOCUMENT_PARAMS(
 		{ "printFrequency", "How frequently to print a message from the component", "5" },
-		{ "repeats", "Number of repetitions to make", "10" }
+		{ "repeats", "Number of repetitions to make", "10" },
+		{ "program", "The assembly file to run.", "" }
 	)
 
 private:
+	AssemblyReader* progReader;
 	SST::Output output;
 	SST::Cycle_t printFreq;
 	SST::Cycle_t maxRepeats;
@@ -37,6 +46,8 @@ private:
 
 };
 
+}
+}
 
 #endif
 

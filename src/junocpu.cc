@@ -1,5 +1,9 @@
 #include <sst/core/sst_config.h>
+
 #include "junocpu.h"
+#include "assembly/asmreader.h"
+
+using namespace SST::Juno;
 
 JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 	SST::Component(id), repeats(0) {
@@ -22,10 +26,21 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 	// Tell SST to wait until we authorize it to exit
     	registerAsPrimaryComponent();
     	primaryComponentDoNotEndSim();
+
+	std::string progFile = params.find<std::string>("program", "");
+
+	if( "" == progFile ) {
+		output.fatal(CALL_INFO, -1, "Error: program file was not specified, nothing to run!\n");
+	}
+
+	output.verbose(CALL_INFO, 1, 0, "Opening program %s ...\n", progFile.c_str());
+	progReader = new AssemblyReader( progFile.c_str() );
+
+	progReader->assemble();
 }
 
 JunoCPU::~JunoCPU() {
-
+	delete progReader;
 }
 
 void JunoCPU::setup() {

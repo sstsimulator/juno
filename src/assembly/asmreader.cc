@@ -114,6 +114,10 @@ void AssemblyReader::assemble() {
 					if( op[0] == 'r' || op[0] == 'R' ) {
 						printf("Making a register from: %s\n", op);
 						newInst->addOperand( new JunoRegisterOperand( op ) );
+					} else if( op[ strlen(op) - 1 ] == ':' ) {
+						printf("Found a label: %s\n", op);
+						labelMap.insert( std::pair<std::string, int64_t>(
+							, instructions.size() );
 					} else if( op[0] == '$' ) {
 						// Literal?
 						printf("Making a literal from: %s\n", op);
