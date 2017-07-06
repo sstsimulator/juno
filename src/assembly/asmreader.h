@@ -14,10 +14,22 @@ public:
 	~AssemblyReader();
 
 	void assemble();
+	int getLiteralIndex(const int64_t checkLit);
+	int64_t convertLiteralFromString(const char* litStr);
+
+	std::vector<JunoInstruction*>& getInstructions() {
+		return instructions;
+	}
+
+	std::vector<uint8_t>& getProgram() {
+		return program;
+	}
 
 protected:
 	bool readLine(char* buffer, const int buffLen);
 	FILE* progFile;
+	std::vector<int64_t> literals;
+	std::vector<JunoInstruction*> instructions;
 	std::vector<uint8_t> program;
 
 };

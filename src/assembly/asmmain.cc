@@ -18,5 +18,12 @@ int main(int argc, char* argv[]) {
 	AssemblyReader reader(argv[1]);
 	reader.assemble();
 
+	std::vector<JunoInstruction*> instructions = reader.getInstructions();
+
+	for(int i = 0; i < instructions.size(); ++i) {
+		printf("%s ops=%d\n", instructions[i]->getInstCode().c_str(),
+			instructions[i]->countOperands());
+	}
+
 	printf("Done.\n");
 }

@@ -16,6 +16,44 @@ AssemblyReader::~AssemblyReader() {
 	if( NULL != progFile ) {
 		fclose( progFile );
 	}
+
+	for(int i = instructions.size() - 1; i >= 0; --i) {
+		delete instructions[i];
+	}
+}
+
+int64_t AssemblyReader::convertLiteralFromString(const char* litStr) {
+	if( strlen(litStr) < 2 ) {
+		fprintf(stderr, "Error: literal string \"%s\" cannot be converted to literal value.\n", litStr);
+		exit(-1);
+	}
+
+	if( '$' != litStr[0] ) {
+		fprintf(stderr, "Error: literal string \"%s\" does not start with a $.\n");
+		exit(-1);
+	}
+
+	return std::atoll( &litStr[1] );
+}
+
+int AssemblyReader::getLiteralIndex(const int64_t checkLit) {
+	const int literalCount = literals.size();
+
+	int index = -1;
+
+	for(int i = 0; i < literalCount; ++i) {
+		if( checkLit == literals[i] ) {
+			index = i;
+			break;
+		}
+	}
+
+	if( -1 == index ) {
+		literals.push_back( checkLit );
+		index = literalCount;
+	}
+
+	return index;
 }
 
 bool AssemblyReader::readLine(char* buffer, const int buffLen) {
@@ -60,8 +98,6 @@ void AssemblyReader::assemble() {
 	char* buffer = (char*) malloc( sizeof(char) * JUNO_MAX_LINE_LEN );
 	int currentLine = 1;
 
-	std::vector<JunoInstruction*> instructions;
-
 	while( readLine(buffer, JUNO_MAX_LINE_LEN) ) {
 		printf("Line[%s]\n", buffer);
 
@@ -81,7 +117,14 @@ void AssemblyReader::assemble() {
 					} else if( op[0] == '$' ) {
 						// Literal?
 						printf("Making a literal from: %s\n", op);
-						newInst->addOperand( new JunoLiteralOperand( op ) );
+						const int64_t literal = convertLiteralFromString(op);
+
+						int literalIndex = getLiteralIndex( literal );
+
+						printf("Found at index: %d\n", literalIndex);
+
+						JunoLiteralOperand* newLit = new JunoLiteralOperand( op );
+						newInst->addOperand( newLit );
 					} else {
 						printf("Making a memory from: %s\n", op);
 						newInst->addOperand( new JunoMemoryOperand( op ) );
