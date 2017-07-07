@@ -26,7 +26,7 @@ public:
 class JunoRegisterOperand : public JunoOperand {
 	#define JUNO_MAX_REGISTER_DIGITS 6
 public:
-	JunoRegisterOperand(const uint16_t regst) :
+	JunoRegisterOperand(const uint8_t regst) :
 		JunoOperand(), reg(regst) {}
 	JunoRegisterOperand(const char* regst) :
 		JunoOperand() {
@@ -51,14 +51,14 @@ public:
 			regNum[i-1] = regst[i];
 		}
 
-		reg = static_cast<uint16_t>( std::atoi(regNum) );
-		printf("Register: %" PRIu16 "\n", reg);
+		reg = static_cast<uint8_t>( std::atoi(regNum) );
+		printf("Register: %" PRIu8 "\n", reg);
 	}
 	JunoOperandType getType() { return REGISTER_OPERAND; }
-	uint16_t getRegister() { return reg; }
+	uint8_t getRegister() { return reg; }
 
 protected:
-	uint16_t reg;
+	uint8_t reg;
 };
 
 class JunoLiteralOperand : public JunoOperand {

@@ -1,7 +1,13 @@
 #include <sst/core/sst_config.h>
 
 #include "junocpu.h"
+#include "junocpuinst.h"
+#include "junoinstmgr.h"
+
+#include "junoalu.h"
+
 #include "assembly/asmreader.h"
+#include "instmgr/junofixedprogmgr.h"
 
 using namespace SST::Juno;
 
@@ -27,6 +33,10 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
     	registerAsPrimaryComponent();
     	primaryComponentDoNotEndSim();
 
+	int maxReg = params.find<int>("registers", "8");
+	output.verbose(CALL_INFO, 1, 0, "Creating a register file of %d 64-bit integer registers...\n", maxReg);
+	regFile = new RegisterFile(maxReg);
+
 	std::string progFile = params.find<std::string>("program", "");
 
 	if( "" == progFile ) {
@@ -37,10 +47,22 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 	progReader = new AssemblyReader( progFile.c_str() );
 
 	progReader->assemble();
+
+	output.verbose(CALL_INFO, 1, 0, "Generating a binary version of the program...\n");
+	progReader->generateProgram();
+
+	output.verbose(CALL_INFO, 1, 0, "Creating an instruction manager...\n");
+	instMgr = new JunoFixedPrgInstMgr( progReader->getProgram() );
+
+	instCyclesLeft = 0;
+	pc = 0;
+
+	output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
 
 JunoCPU::~JunoCPU() {
 	delete progReader;
+	delete regFile;
 }
 
 void JunoCPU::setup() {
@@ -53,17 +75,74 @@ void JunoCPU::finish() {
 
 bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 
-	if( currentCycle % printFreq == 0 ) {
-		output.verbose(CALL_INFO, 1, 0, "Hello World!\n");
-	}
-
-	repeats++;
-
-	if( repeats == maxRepeats ) {
-		primaryComponentOKToEndSim();
-		return true;
+	if( instCyclesLeft > 0 ) {
+		instCyclesLeft--;
 	} else {
-		return false;
-	}
-}
+		if( instMgr->instReady( pc ) ) {
+			output.verbose(CALL_INFO, 2, 0, "Next Instruction, PC=%" PRId64 "...\n", pc);
 
+			JunoCPUInstruction* nextInst = instMgr->getInstruction( pc );
+			const uint8_t nextInstOp = nextInst->getInstCode();
+
+			output.verbose(CALL_INFO, 4, 0, "Operation code: %" PRIu8 "\n", nextInstOp);
+
+			switch( nextInstOp ) {
+			case JUNO_NOOP :
+				pc++;
+				break;
+
+			case JUNO_LOAD :
+				pc++;
+				break;
+
+			case JUNO_STORE :
+				pc++;
+				break;
+
+			case JUNO_ADD :
+				executeAdd( output, nextInst, regFile );
+				pc++;
+				break;
+
+			case JUNO_SUB :
+				pc++;
+				break;
+
+			case JUNO_MUL :
+				pc++;
+				break;
+
+			case JUNO_DIV :
+				pc++;
+				break;
+
+			case JUNO_AND :
+				pc++;
+				break;
+
+			case JUNO_OR :
+				pc++;
+				break;
+
+			case JUNO_XOR :
+				pc++;
+				break;
+
+			case JUNO_NOT :
+				pc++;
+				break;
+
+			case JUNO_EXIT :
+				primaryComponentOKToEndSim();
+				pc++;
+				return true;
+			default:
+				pc++;
+				break;
+
+			}
+		}
+	}
+
+	return false;
+}

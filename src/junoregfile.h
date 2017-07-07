@@ -13,7 +13,8 @@ public:
 	RegisterFile( const int regCount ) :
 		maxReg(regCount) {
 
-		registers = (int64_t) malloc( sizeof(int64_t) * regCount );
+		registers = (int64_t*) malloc( sizeof(int64_t) * regCount );
+		clear();
 	}
 
 	~RegisterFile() {
@@ -26,7 +27,7 @@ public:
 		}
 	}
 
-	int64_t readReg(const int reg) {
+	int64_t readReg(const int reg) const {
 		return registers[reg];
 	}
 

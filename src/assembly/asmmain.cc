@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
 
 	AssemblyReader reader(argv[1]);
 	reader.assemble();
+	reader.generateProgram();
 
 	std::vector<JunoInstruction*> instructions = reader.getInstructions();
 

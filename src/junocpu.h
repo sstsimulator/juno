@@ -5,6 +5,9 @@
 #include <sst/core/elementinfo.h>
 
 #include "assembly/asmreader.h"
+#include "junoregfile.h"
+#include "junoinstmgr.h"
+#include "junocpuinst.h"
 
 using namespace SST::Juno;
 
@@ -39,6 +42,12 @@ public:
 
 private:
 	AssemblyReader* progReader;
+	RegisterFile* regFile;
+	JunoInstructionMgr* instMgr;
+	uint64_t pc;
+
+	SST::Cycle_t instCyclesLeft;
+
 	SST::Output output;
 	SST::Cycle_t printFreq;
 	SST::Cycle_t maxRepeats;
