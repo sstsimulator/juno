@@ -10,26 +10,27 @@
 
 namespace SST {
 namespace Juno {
+namespace Assembler {
 
-enum JunoOperandType {
+enum AssemblyOperandType {
 	REGISTER_OPERAND,
 	MEMORY_OPERAND,
 	LITERAL_OPERAND
 };
 
-class JunoOperand {
+class AssemblyOperand {
 public:
-	JunoOperand() {}
-	virtual JunoOperandType getType() = 0;
+	AssemblyOperand() {}
+	virtual AssemblyOperandType getType() = 0;
 };
 
-class JunoRegisterOperand : public JunoOperand {
+class AssemblyRegisterOperand : public AssemblyOperand {
 	#define JUNO_MAX_REGISTER_DIGITS 6
 public:
-	JunoRegisterOperand(const uint8_t regst) :
-		JunoOperand(), reg(regst) {}
-	JunoRegisterOperand(const char* regst) :
-		JunoOperand() {
+	AssemblyRegisterOperand(const uint8_t regst) :
+		AssemblyOperand(), reg(regst) {}
+	AssemblyRegisterOperand(const char* regst) :
+		AssemblyOperand() {
 
 		if(strlen(regst) == 0) {
 			fprintf(stderr, "Error: register number is empty.\n");
@@ -54,20 +55,20 @@ public:
 		reg = static_cast<uint8_t>( std::atoi(regNum) );
 		printf("Register: %" PRIu8 "\n", reg);
 	}
-	JunoOperandType getType() { return REGISTER_OPERAND; }
+	AssemblyOperandType getType() { return REGISTER_OPERAND; }
 	uint8_t getRegister() { return reg; }
 
 protected:
 	uint8_t reg;
 };
 
-class JunoLiteralOperand : public JunoOperand {
+class AssemblyLiteralOperand : public AssemblyOperand {
 public:
-	JunoLiteralOperand(const int64_t literal) :
-		JunoOperand(), val(literal) {}
+	AssemblyLiteralOperand(const int64_t literal) :
+		AssemblyOperand(), val(literal) {}
 
-	JunoLiteralOperand(const char* litStr) :
-		JunoOperand() {
+	AssemblyLiteralOperand(const char* litStr) :
+		AssemblyOperand() {
 
 		if(strlen(litStr) == 0) {
 			fprintf(stderr, "Error: literal value is empty.\n");
@@ -93,38 +94,38 @@ public:
 		printf("Literal: %" PRId64 "\n", val);
 	}
 
-	JunoOperandType getType() { return LITERAL_OPERAND; }
+	AssemblyOperandType getType() { return LITERAL_OPERAND; }
 	int64_t getLiteral() { return val; }
 
 protected:
 	int64_t val;
 };
 
-class JunoMemoryOperand : public JunoOperand {
+class JunoMemoryOperand : public AssemblyOperand {
 public:
 	JunoMemoryOperand(const uint64_t address) :
-		JunoOperand(), addr(address) {}
+		AssemblyOperand(), addr(address) {}
 	JunoMemoryOperand(const char* addrStr) :
-		JunoOperand() {
+		AssemblyOperand() {
 
 		char* num_end;
 		addr = static_cast<uint64_t>( std::strtoull(addrStr, &num_end, 10) );
 	}
 	uint64_t getAddress() { return addr; }
-	JunoOperandType getType() { return MEMORY_OPERAND; }
+	AssemblyOperandType getType() { return MEMORY_OPERAND; }
 
 protected:
 	uint64_t addr;
 };
 
-class JunoInstruction {
+class AssemblyOperation {
 
 public:
-	JunoInstruction(const char* instMnu) :
+	AssemblyOperation(const char* instMnu) :
 		inst(instMnu) {}
-	~JunoInstruction() {}
+	~AssemblyOperation() {}
 
-	void addOperand(JunoOperand* op) {
+	void addOperand(AssemblyOperand* op) {
 		operands.push_back(op);
 	}
 
@@ -132,7 +133,7 @@ public:
 		return static_cast<int>( operands.size() );
 	}
 
-	JunoOperand* getOperand(const int i) {
+	AssemblyOperand* getOperand(const int i) {
 		return operands.at(i);
 	}
 
@@ -140,10 +141,11 @@ public:
 
 protected:
 	std::string inst;
-	std::vector<JunoOperand*> operands;
+	std::vector<AssemblyOperand*> operands;
 
 };
 
+}
 }
 }
 

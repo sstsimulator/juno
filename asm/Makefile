@@ -1,10 +1,16 @@
 
+ASM_SOURCES := $(wildcard assembly/*.cc)
+ASM_HEADERS := $(wildcard assembly/*.h)
+JUNO_OP_CODES := ../src/junoopcodes.h
+
+JUNO_OBJS := $(patsubst %.cc,%.o,$(wildcard *.cc))
+
 CXX=g++
-CPPFLAGS=-I.
+CPPFLAGS=-I. -O3
 CXXFLAGS=-std=c++11 -g
 
-junoasm: asmmain.o asmreader.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ asmmain.o asmreader.o
+sst-juno-asm: $(JUNO_OBJS) $(ASM_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $(JUNO_OBJS)
 
 clean:
-	rm junoasm *.o
+	rm sst-juno-asm *.o

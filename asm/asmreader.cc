@@ -3,24 +3,16 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "asminst.h"
+#include "asmop.h"
 #include "asmreader.h"
+#include "asmoptions.h"
 
-using namespace SST::Juno;
+using namespace SST::Juno::Assembler;
 
-AssemblyReader::AssemblyReader( const char* progPath ) {
-	progFile = fopen( progPath, "r" );
-}
+AssemblyReader::AssemblyReader( AssemblyOptions* ops ) :
+	options( ops ) {}
 
-AssemblyReader::~AssemblyReader() {
-	if( NULL != progFile ) {
-		fclose( progFile );
-	}
-
-	for(int i = instructions.size() - 1; i >= 0; --i) {
-		delete instructions[i];
-	}
-}
+AssemblyReader::~AssemblyReader() {}
 
 int64_t AssemblyReader::convertLiteralFromString(const char* litStr) {
 	if( strlen(litStr) < 2 ) {
@@ -92,7 +84,9 @@ bool AssemblyReader::readLine(char* buffer, const int buffLen) {
 	}
 }
 
-void AssemblyReader::assemble() {
+AssemblyProgram* AssemblyReader::assemble() {
+	AssemblyProgram* program;
+
 	#define JUNO_MAX_LINE_LEN 2048
 
 	char* buffer = (char*) malloc( sizeof(char) * JUNO_MAX_LINE_LEN );
@@ -144,57 +138,7 @@ void AssemblyReader::assemble() {
 	}
 
 	free(buffer);
+	
+	return program;
 }
 
-void AssemblyReader::generateProgram() {
-
-	for( int i = 0; i < instructions.size(); i++ ) {
-		JunoInstruction* nextInst = instructions.at(i);
-
-		std::string instMnu = nextInst->getInstCode();
-
-		if( instMnu == "ADD" ) {
-			int64_t longCode = JUNO_ADD;
-
-			if( nextInst->countOperands() != 3 ) {
-				fprintf(stderr, "Error: instruction must have three operands (RRW), it has %d.\n",
-					nextInst->countOperands());
-			}
-
-			JunoOperand* tmp = nextInst->getOperand(0);
-
-			if( tmp->getType() != REGISTER_OPERAND ) {
-				fprintf(stderr, "Error: operands must be a register\n");
-			}
-
-			JunoRegisterOperand* regTmp = dynamic_cast<JunoRegisterOperand*>(tmp);
-			longCode += (static_cast<int64_t>(regTmp->getRegister()) << 8);
-
-			tmp = nextInst->getOperand(1);
-
-			if( tmp->getType() != REGISTER_OPERAND ) {
-				fprintf(stderr, "Error: operands must be a register\n");
-			}
-
-			regTmp = dynamic_cast<JunoRegisterOperand*>(tmp);
-			longCode += (static_cast<int64_t>(regTmp->getRegister()) << 16);
-
-			tmp = nextInst->getOperand(2);
-
-			if( tmp->getType() != REGISTER_OPERAND ) {
-				fprintf(stderr, "Error: operands must be a register\n");
-			}
-
-			regTmp = dynamic_cast<JunoRegisterOperand*>(tmp);
-			longCode += (static_cast<int64_t>(regTmp->getRegister()) << 24);
-
-			JunoCPUInstruction* cpuInst = new JunoCPUInstruction( longCode );
-			program.push_back( cpuInst );
-
-			printf("0x%" PRIx64 "\n", longCode);
-		} else if ( instMnu == "EXIT" ) {
-			program.push_back( new JunoCPUInstruction( JUNO_EXIT ) );
-		}
-	}
-
-}
