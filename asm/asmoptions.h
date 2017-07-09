@@ -13,9 +13,9 @@ class AssemblerOptions {
 
 public:
 	AssemblerOptions(const int argc, char* argv[]) {
-		outputFilePath = "a.out";
+		outputFilePath = "program.bin";
 		inputFilePath.clear();
-	
+
 		for(int i = 1; i < argc; ++i) {
 			if( 0 == strcmp("-o", argv[i]) ) {
 				if( (i+1) < argc ) {
@@ -36,11 +36,11 @@ public:
 			} else if(  0 == strcmp("-help", argv[i]) ||
 						0 == strcmp("--help", argv[i]) ||
 						0 == strcmp("-h", argv[i]) ) {
-					
+
 				printf("sst-juno-asm [-i <input file>] [-o <output file>]\n");
 				printf("\n");
 				printf("<input file>   File to read in, if not specified stdin\n");
-				printf("<output file>  File to write to, if not specified stdout.\n");
+				printf("<output file>  File to write to, if not specified program.bin\n");
 				printf("\n");
 				exit(0);
 			} else {
@@ -48,14 +48,14 @@ public:
 				exit(-1);
 			}
 		}
-		
+
 		if( "" == inputFilePath ) {
 			inputFile = stdin;
 		} else {
 			inputFile = fopen( inputFilePath.c_str(), "r" );
 			inputFilePath = "-";
 		}
-		
+
 		if( "" == outputFilePath ) {
 			outputFile = stdout;
 		} else {

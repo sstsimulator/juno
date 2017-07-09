@@ -13,15 +13,34 @@ namespace Juno {
 namespace Assembler {
 
 enum AssemblyOperandType {
-	REGISTER_OPERAND,
-	MEMORY_OPERAND,
-	LITERAL_OPERAND
+	REGISTER_OPERAND = 0,
+	MEMORY_OPERAND = 1,
+	LITERAL_OPERAND = 2,
+	LABEL_OPERAND = 4
 };
 
 class AssemblyOperand {
 public:
 	AssemblyOperand() {}
 	virtual AssemblyOperandType getType() = 0;
+};
+
+class AssemblyLabelOperand : public AssemblyOperand {
+public:
+	AssemblyLabelOperand( char* label ):
+		labelText(label) {}
+	~AssemblyLabelOperand() {}
+
+	AssemblyOperandType getType() {
+		return LABEL_OPERAND;
+	}
+
+	const std::string& getLabel() const {
+		return labelText;
+	}
+
+protected:
+	std::string labelText;
 };
 
 class AssemblyRegisterOperand : public AssemblyOperand {
@@ -55,6 +74,7 @@ public:
 		reg = static_cast<uint8_t>( std::atoi(regNum) );
 		printf("Register: %" PRIu8 "\n", reg);
 	}
+
 	AssemblyOperandType getType() { return REGISTER_OPERAND; }
 	uint8_t getRegister() { return reg; }
 
@@ -99,6 +119,7 @@ public:
 
 protected:
 	int64_t val;
+	uint64_t valIndex;
 };
 
 class AssemblyMemoryOperand : public AssemblyOperand {

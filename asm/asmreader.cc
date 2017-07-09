@@ -28,28 +28,6 @@ int64_t AssemblyReader::convertLiteralFromString(const char* litStr) {
 	return std::atoll( &litStr[1] );
 }
 
-int AssemblyReader::getLiteralIndex(const int64_t checkLit) {
-/*
-	const int literalCount = literals.size();
-
-	int index = -1;
-
-	for(int i = 0; i < literalCount; ++i) {
-		if( checkLit == literals[i] ) {
-			index = i;
-			break;
-		}
-	}
-
-	if( -1 == index ) {
-		literals.push_back( checkLit );
-		index = literalCount;
-	}
-*/
-	const int index = 0;
-	return index;
-}
-
 bool AssemblyReader::readLine(char* buffer, const int buffLen) {
 	FILE* inFile = options->getInputFile();
 
@@ -129,18 +107,18 @@ AssemblyProgram* AssemblyReader::assemble() {
 					} else if( op[0] == '$' ) {
 						// Literal?
 						printf("Making a literal from: %s\n", op);
-						const int64_t literal = convertLiteralFromString(op);
-
-						int literalIndex = getLiteralIndex( literal );
-
-						printf("Found at index: %d\n", literalIndex);
+						//const int64_t literal = convertLiteralFromString(op);
 
 						AssemblyLiteralOperand* newLit = new AssemblyLiteralOperand( op );
 						newInst->addOperand( newLit );
-					} else {
+					} else if( isdigit( op[0] ) ) {
 						printf("Making a memory from: %s\n", op);
 						newInst->addOperand( new AssemblyMemoryOperand( op ) );
 						// Literal?
+					} else {
+						// Jump Label?
+						printf("Making a jump label from %s\n", op);
+						newInst->addOperand( new AssemblyLabelOperand( op ) );
 					}
 
 					op = strtok( NULL, " " );
@@ -153,7 +131,15 @@ AssemblyProgram* AssemblyReader::assemble() {
 	}
 
 	free(buffer);
-	
+
+	printf("Parsed all operations, found %d operations...\n",
+		static_cast<int>(program->countOperations()) );
+
+	// Collect up all the literal values we have found in the program
+	// we want to have a unique set to decrease memory consumption
+	// and improve cache hit rates
+	program->collectLiterals();
+
 	return program;
 }
 

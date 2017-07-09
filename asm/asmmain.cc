@@ -21,9 +21,18 @@ int main(int argc, char* argv[]) {
 	AssemblyProgram* program = reader->assemble();
 
 	printf("Assembly complete, cleaning up ...\n");
+	printf("Found %d literal values.\n", program->countInt64Literals() );
+
+	bool labelsOK = program->verifyLabels();
+
+	if( labelsOK ) {
+		printf("All labels checkout OK.\n");
+	} 
+
+	printf("Writing binary...\n");
+	program->writeBinary( options->getOutputFile() );
 
 	delete program;
 	delete reader;
 	delete options;
-
 }
