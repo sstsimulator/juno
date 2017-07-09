@@ -4,6 +4,7 @@
 
 #define JUNO_NOOP          0
 #define JUNO_LOAD          1
+#define JUNO_LOAD_ADDR     2
 #define JUNO_STORE         8
 
 #define JUNO_ADD           16

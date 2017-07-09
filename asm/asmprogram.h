@@ -156,6 +156,10 @@ public:
 		char binaryOp[4];
 
 		for( int i = 0; i < op->size(); ++i ) {
+			for( int j = 0; j < 4; ++j ) {
+				binaryOp[j] = 0;
+			}
+
 			AssemblyOperation* curOp = op->at(i);
 
 			if( curOp->getInstCode() == "ADD" ) {
@@ -172,6 +176,20 @@ public:
 				generateBinaryOperand( JUNO_OR, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "XOR" ) {
 				generateBinaryOperand( JUNO_XOR, curOp, binaryOp );
+			} else if( curOp->getInstCode() == "JZERO" ) {
+				generatePCRJump( JUNO_PCR_JUMP_ZERO, curOp, binaryOp, static_cast<uint64_t>(i) );
+			} else if( curOp->getInstCode() == "JLTZ" ) {
+				generatePCRJump( JUNO_PCR_JUMP_LTZ, curOp, binaryOp, static_cast<uint64_t>(i) );
+			} else if( curOp->getInstCode() == "JGTZ" ) {
+				generatePCRJump( JUNO_PCR_JUMP_GTZ, curOp, binaryOp, static_cast<uint64_t>(i) );
+			} else if( curOp->getInstCode() == "HALT" ) {
+				const uint8_t junoCode = JUNO_HALT;
+				const uint8_t zero     = 0;
+
+				memcpy( (void*) &binaryOp[0], (void*)& junoCode, sizeof(junoCode) );
+				memcpy( (void*) &binaryOp[1], (void*)& zero, sizeof(zero) );
+				memcpy( (void*) &binaryOp[2], (void*)& zero, sizeof(zero) );
+				memcpy( (void*) &binaryOp[3], (void*)& zero, sizeof(zero) );
 			} else {
 				fprintf(stderr, "Unknown instruction code: %s at instruction index: %d\n",
 					curOp->getInstCode().c_str(), i);
@@ -180,6 +198,38 @@ public:
 
 			fwrite( &binaryOp[0], sizeof(char), 4, binary );
 		}
+	}
+
+	void generatePCRJump( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp, uint64_t instLoc ) {
+		memcpy( (void*) &binaryOp[0], (void*) &junoCode, sizeof(junoCode) );
+
+		if( curOp->countOperands() != 2 ) {
+			fprintf(stderr, "Error: instruction (%s) must have two operands, it has %d\n",
+				curOp->getInstCode().c_str(), curOp->countOperands());
+			exit(-1);
+		}
+
+		if( curOp->getOperand(0)->getType() != REGISTER_OPERAND ) {
+			fprintf(stderr, "Error: a performance-counter relative jump must provide a register to evaluate as its first operand.\n");
+			exit(-1);
+		}
+
+		AssemblyRegisterOperand* regOp = dynamic_cast<AssemblyRegisterOperand*>(curOp->getOperand(0));
+		const uint8_t reg = regOp->getRegister();
+
+		memcpy( (void*) &binaryOp[1], (void*) &reg, sizeof(reg) );
+
+		if( curOp->getOperand(1)->getType() != LABEL_OPERAND ) {
+			fprintf(stderr, "Error: a performance-counter relative jump must provide a label to jump to.\n");
+		}
+
+		AssemblyLabelOperand* labelOp = dynamic_cast<AssemblyLabelOperand*>(curOp->getOperand(1));
+
+		const int64_t jumpLoc = static_cast<int64_t>( labelMap.find(labelOp->getLabel())->second );
+		const int64_t locDiff = static_cast<int64_t>( instLoc ) - jumpLoc;
+		const int16_t jumpBy16b = static_cast<int16_t>( locDiff );
+
+		memcpy( (void*) &binaryOp[2], (void*) &jumpBy16b, sizeof(jumpBy16b) );
 	}
 
 	void generateBinaryOperand( const char junoCode, AssemblyOperation* curOp, char* binaryOp ) {
