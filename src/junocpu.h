@@ -4,7 +4,7 @@
 #include <sst/core/component.h>
 #include <sst/core/elementinfo.h>
 
-#include "assembly/asmreader.h"
+#include "junoprogreader.h"
 #include "junoregfile.h"
 #include "junoinstmgr.h"
 #include "junocpuinst.h"
@@ -37,11 +37,12 @@ public:
 	SST_ELI_DOCUMENT_PARAMS(
 		{ "printFrequency", "How frequently to print a message from the component", "5" },
 		{ "repeats", "Number of repetitions to make", "10" },
-		{ "program", "The assembly file to run.", "" }
+		{ "program", "The assembly file to run.", "" },
+		{ "verbose", "Sets the verbosity level of output.", "0" }
 	)
 
 private:
-	AssemblyReader* progReader;
+	JunoProgramReader* progReader;
 	RegisterFile* regFile;
 	JunoInstructionMgr* instMgr;
 	uint64_t pc;

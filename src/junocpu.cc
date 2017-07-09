@@ -6,7 +6,6 @@
 
 #include "junoalu.h"
 
-#include "assembly/asmreader.h"
 #include "instmgr/junofixedprogmgr.h"
 
 using namespace SST::Juno;
@@ -14,7 +13,9 @@ using namespace SST::Juno;
 JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 	SST::Component(id), repeats(0) {
 
-	output.init("Juno-" + getName() + "-> ", 1, 0, SST::Output::STDOUT);
+	int verbosity = params.find<int>("verbose");
+
+	output.init("Juno-" + getName() + "-> ", verbosity, 0, SST::Output::STDOUT);
 
 	printFreq  = params.find<SST::Cycle_t>("printFrequency", 5);
 	maxRepeats = params.find<SST::Cycle_t>("repeats", 10);
@@ -44,18 +45,23 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 	}
 
 	output.verbose(CALL_INFO, 1, 0, "Opening program %s ...\n", progFile.c_str());
-	progReader = new AssemblyReader( progFile.c_str() );
+	FILE* progFileHandle = fopen(progFile.c_str(), "r");
 
-	progReader->assemble();
+	if( NULL == progFileHandle ) {
+		output.fatal(CALL_INFO, -1, "Error: unable to open program: %s\n", progFile.c_str());
+	}
 
-	output.verbose(CALL_INFO, 1, 0, "Generating a binary version of the program...\n");
-	progReader->generateProgram();
+	progReader = new JunoProgramReader( progFileHandle , &output );
+
+	fclose(progFileHandle);
 
 	output.verbose(CALL_INFO, 1, 0, "Creating an instruction manager...\n");
-	instMgr = new JunoFixedPrgInstMgr( progReader->getProgram() );
+	instMgr = new JunoFixedPrgInstMgr( progReader->getBinaryBuffer(), (progReader->getDataLength() + progReader->getInstLength()) );
 
 	instCyclesLeft = 0;
-	pc = 0;
+	pc = progReader->getDataLength();
+
+	output.verbose(CALL_INFO, 1, 0, "PC set to: %" PRIu64 "\n", pc);
 
 	output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
@@ -75,6 +81,8 @@ void JunoCPU::finish() {
 
 bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 
+	output.verbose(CALL_INFO, 2, 0, "Cycle: %" PRIu64 "\n", static_cast<uint64_t>(currentCycle));
+
 	if( instCyclesLeft > 0 ) {
 		instCyclesLeft--;
 	} else {
@@ -88,59 +96,74 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 
 			switch( nextInstOp ) {
 			case JUNO_NOOP :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_LOAD :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_STORE :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_ADD :
 				executeAdd( output, nextInst, regFile );
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_SUB :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_MUL :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_DIV :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_AND :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_OR :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_XOR :
-				pc++;
+				pc += 4;
 				break;
 
 			case JUNO_NOT :
-				pc++;
+				pc += 4;
 				break;
 
-			case JUNO_EXIT :
+			case JUNO_PCR_JUMP:
+				pc += 4;
+				break;
+
+			case JUNO_PCR_JUMP_ZERO:
+				pc += 4;
+				break;
+
+			case JUNO_PCR_JUMP_LTZ:
+				pc += 4;
+				break;
+
+			case JUNO_PCR_JUMP_GTZ:
+				pc += 4;
+				break;
+
+			case JUNO_HALT :
 				primaryComponentOKToEndSim();
-				pc++;
 				return true;
 			default:
-				pc++;
 				break;
 
 			}
+
 		}
 	}
 

@@ -11,7 +11,12 @@ namespace Juno {
 class JunoFixedPrgInstMgr : public JunoInstructionMgr {
 
 public:
-	JunoFixedPrgInstMgr( std::vector<JunoCPUInstruction*> program ) : JunoInstructionMgr() {}
+	JunoFixedPrgInstMgr( const char* buff, const uint64_t length ) :
+		JunoInstructionMgr(), maxLen(length) {
+
+		buffer = (char*) malloc( sizeof(char) * maxLen );
+		memcpy( buffer, buff, maxLen );
+	}
 	~JunoFixedPrgInstMgr() {}
 
 	bool instReady( const uint64_t addr ) {
@@ -19,11 +24,17 @@ public:
 	}
 
 	JunoCPUInstruction* getInstruction( const uint64_t addr ) {
-		return prog.at(addr);
+		int32_t instCode = 0;
+
+		memcpy( (void*) &instCode, &buffer[addr], sizeof(instCode) );
+		JunoCPUInstruction* inst = new JunoCPUInstruction( instCode);
+
+		return inst;
 	}
 
 protected:
-	std::vector<JunoCPUInstruction*> prog;
+	char* buffer;
+	uint64_t maxLen;
 
 };
 

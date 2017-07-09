@@ -176,12 +176,14 @@ public:
 				generateBinaryOperand( JUNO_OR, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "XOR" ) {
 				generateBinaryOperand( JUNO_XOR, curOp, binaryOp );
+			} else if( curOp->getInstCode() == "JUMP" ) {
+				generatePCRJump( JUNO_PCR_JUMP, curOp, binaryOp, static_cast<uint64_t>(i) );
 			} else if( curOp->getInstCode() == "JZERO" ) {
-				generatePCRJump( JUNO_PCR_JUMP_ZERO, curOp, binaryOp, static_cast<uint64_t>(i) );
+				generatePCRRegJump( JUNO_PCR_JUMP_ZERO, curOp, binaryOp, static_cast<uint64_t>(i) );
 			} else if( curOp->getInstCode() == "JLTZ" ) {
-				generatePCRJump( JUNO_PCR_JUMP_LTZ, curOp, binaryOp, static_cast<uint64_t>(i) );
+				generatePCRRegJump( JUNO_PCR_JUMP_LTZ, curOp, binaryOp, static_cast<uint64_t>(i) );
 			} else if( curOp->getInstCode() == "JGTZ" ) {
-				generatePCRJump( JUNO_PCR_JUMP_GTZ, curOp, binaryOp, static_cast<uint64_t>(i) );
+				generatePCRRegJump( JUNO_PCR_JUMP_GTZ, curOp, binaryOp, static_cast<uint64_t>(i) );
 			} else if( curOp->getInstCode() == "HALT" ) {
 				const uint8_t junoCode = JUNO_HALT;
 				const uint8_t zero     = 0;
@@ -201,6 +203,28 @@ public:
 	}
 
 	void generatePCRJump( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp, uint64_t instLoc ) {
+		memcpy( (void*) &binaryOp[0], (void*) &junoCode, sizeof(junoCode) );
+
+		if( curOp->countOperands() != 1 ) {
+			fprintf(stderr, "Error: instruction %s can only have one operand (a LABEL)\n", curOp->getInstCode().c_str());
+			exit(-1);
+		}
+
+		if( curOp->getOperand(0)->getType() != LABEL_OPERAND ) {
+			fprintf(stderr, "Error: instruction %s does not have a label operand.\n", curOp->getInstCode().c_str());
+			exit(-1);
+		}
+
+		AssemblyLabelOperand* labelOp = dynamic_cast<AssemblyLabelOperand*>(curOp->getOperand(1));
+
+		const int64_t labelLoc = static_cast<int64_t>( labelMap.find(labelOp->getLabel())->second );
+		const int64_t localDiff = static_cast<int64_t>(instLoc) - labelLoc;
+		const int16_t jumpBy16b = static_cast<int16_t>( localDiff );
+
+		memcpy( (void*) &binaryOp[2], (void*) &jumpBy16b, sizeof(jumpBy16b) );
+	}
+
+	void generatePCRRegJump( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp, uint64_t instLoc ) {
 		memcpy( (void*) &binaryOp[0], (void*) &junoCode, sizeof(junoCode) );
 
 		if( curOp->countOperands() != 2 ) {
