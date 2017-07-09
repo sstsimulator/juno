@@ -101,16 +101,17 @@ protected:
 	int64_t val;
 };
 
-class JunoMemoryOperand : public AssemblyOperand {
+class AssemblyMemoryOperand : public AssemblyOperand {
 public:
-	JunoMemoryOperand(const uint64_t address) :
+	AssemblyMemoryOperand(const uint64_t address) :
 		AssemblyOperand(), addr(address) {}
-	JunoMemoryOperand(const char* addrStr) :
+	AssemblyMemoryOperand(const char* addrStr) :
 		AssemblyOperand() {
 
 		char* num_end;
 		addr = static_cast<uint64_t>( std::strtoull(addrStr, &num_end, 10) );
 	}
+
 	uint64_t getAddress() { return addr; }
 	AssemblyOperandType getType() { return MEMORY_OPERAND; }
 

@@ -3,8 +3,10 @@
 #include <cstdlib>
 
 #include "asmreader.h"
+#include "asmoptions.h"
+#include "asmprogram.h"
 
-using namespace SST::Juno;
+using namespace SST::Juno::Assembler;
 
 int main(int argc, char* argv[]) {
 
@@ -15,16 +17,15 @@ int main(int argc, char* argv[]) {
 
 	printf("Assembling: %s...\n", argv[1]);
 
-	AssemblyReader reader(argv[1]);
-	reader.assemble();
-	reader.generateProgram();
+	AssemblerOptions* options = new AssemblerOptions();
+	AssemblyReader* reader = new AssemblyReader(options);
 
-	std::vector<JunoInstruction*> instructions = reader.getInstructions();
+	AssemblyProgram* program = reader->assemble();
 
-	for(int i = 0; i < instructions.size(); ++i) {
-		printf("%s ops=%d\n", instructions[i]->getInstCode().c_str(),
-			instructions[i]->countOperands());
-	}
+	printf("Assembly complete, cleaning up ...\n");
 
-	printf("Done.\n");
+	delete program;
+	delete reader;
+	delete options;
+
 }

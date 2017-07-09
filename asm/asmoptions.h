@@ -30,6 +30,14 @@ public:
 		}
 	}
 
+	FILE* getInputFile() {
+		return inputFile;
+	}
+
+	FILE* getOutputFile() {
+		return outputFile;
+	}
+
 	void setInputFilePath(const std::string& path) {
 		inputFilePath = path;
 

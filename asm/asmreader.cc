@@ -9,7 +9,7 @@
 
 using namespace SST::Juno::Assembler;
 
-AssemblyReader::AssemblyReader( AssemblyOptions* ops ) :
+AssemblyReader::AssemblyReader( AssemblerOptions* ops ) :
 	options( ops ) {}
 
 AssemblyReader::~AssemblyReader() {}
@@ -29,6 +29,7 @@ int64_t AssemblyReader::convertLiteralFromString(const char* litStr) {
 }
 
 int AssemblyReader::getLiteralIndex(const int64_t checkLit) {
+/*
 	const int literalCount = literals.size();
 
 	int index = -1;
@@ -44,15 +45,18 @@ int AssemblyReader::getLiteralIndex(const int64_t checkLit) {
 		literals.push_back( checkLit );
 		index = literalCount;
 	}
-
+*/
+	const int index = 0;
 	return index;
 }
 
 bool AssemblyReader::readLine(char* buffer, const int buffLen) {
-	if( feof( progFile ) ) {
+	FILE* inFile = options->getInputFile();
+
+	if( feof( inFile ) ) {
 		return false;
 	} else {
-		int nextChar = fgetc( progFile );
+		int nextChar = fgetc( inFile );
 		int nextIndex = 0;
 
 		if( ('\n' == nextChar) || ('\r' == nextChar) || ('\f' == nextChar) ) {
@@ -62,7 +66,7 @@ bool AssemblyReader::readLine(char* buffer, const int buffLen) {
 				buffer[nextIndex] = (char) nextChar;
 				nextIndex++;
 
-				nextChar = fgetc( progFile );
+				nextChar = fgetc( inFile );
 
 				if( ( '\n' == nextChar ) ||
 				    ( '\r' == nextChar ) ||
@@ -100,14 +104,14 @@ AssemblyProgram* AssemblyReader::assemble() {
 			if( '#' != buffer[0] ) {
 				char* inst = strtok( buffer, " " );
 
-				JunoInstruction* newInst = new JunoInstruction(inst);
-				instructions.push_back(newInst);
+				AssemblyOperation* newInst = new AssemblyOperation(inst);
+				program->addOperation(newInst);
 
 				char* op = strtok(NULL, " ");
 				while( NULL != op ) {
 					if( op[0] == 'r' || op[0] == 'R' ) {
 						printf("Making a register from: %s\n", op);
-						newInst->addOperand( new JunoRegisterOperand( op ) );
+						newInst->addOperand( new AssemblyRegisterOperand( op ) );
 					} else if( op[ strlen(op) - 1 ] == ':' ) {
 						printf("Found a label: %s\n", op);
 //						labelMap.insert( std::pair<std::string, int64_t>(
@@ -121,11 +125,11 @@ AssemblyProgram* AssemblyReader::assemble() {
 
 						printf("Found at index: %d\n", literalIndex);
 
-						JunoLiteralOperand* newLit = new JunoLiteralOperand( op );
+						AssemblyLiteralOperand* newLit = new AssemblyLiteralOperand( op );
 						newInst->addOperand( newLit );
 					} else {
 						printf("Making a memory from: %s\n", op);
-						newInst->addOperand( new JunoMemoryOperand( op ) );
+						newInst->addOperand( new AssemblyMemoryOperand( op ) );
 						// Literal?
 					}
 
