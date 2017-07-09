@@ -141,7 +141,7 @@ public:
 	std::string getInstCode() { return inst; }
 
 protected:
-	std::string inst;
+	const std::string inst;
 	std::vector<AssemblyOperand*> operands;
 
 };
