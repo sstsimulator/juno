@@ -89,7 +89,7 @@ bool AssemblyReader::readLine(char* buffer, const int buffLen) {
 }
 
 AssemblyProgram* AssemblyReader::assemble() {
-	AssemblyProgram* program;
+	AssemblyProgram* program = new AssemblyProgram();
 
 	#define JUNO_MAX_LINE_LEN 2048
 
@@ -104,6 +104,16 @@ AssemblyProgram* AssemblyReader::assemble() {
 			if( '#' != buffer[0] ) {
 				char* inst = strtok( buffer, " " );
 
+				if( inst[ strlen(inst) - 1 ] == ':' ) {
+					// This is an assembly label
+					inst[ strlen(inst) - 1 ] = '\0';
+
+					std::string label(inst);
+
+					printf("Creating label: \"%s\" at location: %" PRIu64 "...\n", label.c_str(), program->countOperations());
+					program->addLabel(label, program->countOperations());
+				} else {
+
 				printf("Creating instruction [%s]...\n", inst);
 
 				AssemblyOperation* newInst = new AssemblyOperation(inst);
@@ -116,10 +126,6 @@ AssemblyProgram* AssemblyReader::assemble() {
 					if( op[0] == 'r' || op[0] == 'R' ) {
 						printf("Making a register from: %s\n", op);
 						newInst->addOperand( new AssemblyRegisterOperand( op ) );
-					} else if( op[ strlen(op) - 1 ] == ':' ) {
-						printf("Found a label: %s\n", op);
-//						labelMap.insert( std::pair<std::string, int64_t>(
-//							, instructions.size() );
 					} else if( op[0] == '$' ) {
 						// Literal?
 						printf("Making a literal from: %s\n", op);
@@ -138,6 +144,7 @@ AssemblyProgram* AssemblyReader::assemble() {
 					}
 
 					op = strtok( NULL, " " );
+				}
 				}
 			}
 		}

@@ -6,7 +6,7 @@ JUNO_OP_CODES := ../src/junoopcodes.h
 JUNO_OBJS := $(patsubst %.cc,%.o,$(ASM_SOURCES))
 
 CXX=g++
-CPPFLAGS=-I. -O3
+CPPFLAGS=-I. -O3 -Wall
 CXXFLAGS=-std=c++11 -g
 
 sst-juno-asm: $(JUNO_OBJS) $(ASM_HEADERS)

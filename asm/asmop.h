@@ -122,10 +122,7 @@ protected:
 class AssemblyOperation {
 
 public:
-	AssemblyOperation(const char* instMnu) {
-		instCode = (char*) malloc( sizeof(char) * (strlen(instMnu + 1)) );
-		strcpy( instCode, instMnu );
-	}
+	AssemblyOperation(const char* instMnu) : instCode(instMnu) {}
 	~AssemblyOperation() {}
 
 	void addOperand(AssemblyOperand* op) {
@@ -141,12 +138,11 @@ public:
 	}
 
 	std::string getInstCode() {
-		std::string instCodeStr( instCode );
-		return instCodeStr;
+		return instCode;
 	}
 
 protected:
-	char* instCode;
+	const std::string instCode;
 	std::vector<AssemblyOperand*> operands;
 
 };
