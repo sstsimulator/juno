@@ -104,8 +104,12 @@ AssemblyProgram* AssemblyReader::assemble() {
 			if( '#' != buffer[0] ) {
 				char* inst = strtok( buffer, " " );
 
+				printf("Creating instruction [%s]...\n", inst);
+
 				AssemblyOperation* newInst = new AssemblyOperation(inst);
 				program->addOperation(newInst);
+
+				printf("Populating operands...\n");
 
 				char* op = strtok(NULL, " ");
 				while( NULL != op ) {

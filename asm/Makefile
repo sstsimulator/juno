@@ -1,9 +1,9 @@
 
-ASM_SOURCES := $(wildcard assembly/*.cc)
-ASM_HEADERS := $(wildcard assembly/*.h)
+ASM_SOURCES := $(wildcard *.cc)
+ASM_HEADERS := $(wildcard *.h)
 JUNO_OP_CODES := ../src/junoopcodes.h
 
-JUNO_OBJS := $(patsubst %.cc,%.o,$(wildcard *.cc))
+JUNO_OBJS := $(patsubst %.cc,%.o,$(ASM_SOURCES))
 
 CXX=g++
 CPPFLAGS=-I. -O3
