@@ -15,9 +15,7 @@ int main(int argc, char* argv[]) {
 		exit(-1);
 	}
 
-	printf("Assembling: %s...\n", argv[1]);
-
-	AssemblerOptions* options = new AssemblerOptions();
+	AssemblerOptions* options = new AssemblerOptions(argc, argv);
 	AssemblyReader* reader = new AssemblyReader(options);
 
 	AssemblyProgram* program = reader->assemble();

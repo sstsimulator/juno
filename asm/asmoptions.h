@@ -12,6 +12,58 @@ namespace Assembler {
 class AssemblerOptions {
 
 public:
+	AssemblerOptions(const int argc, char* argv[]) {
+		outputFilePath = "a.out";
+		inputFilePath.clear();
+	
+		for(int i = 1; i < argc; ++i) {
+			if( 0 == strcmp("-o", argv[i]) ) {
+				if( (i+1) < argc ) {
+					outputFilePath.append( argv[i+1] );
+					i = i + 1;
+				} else {
+					fprintf(stderr, "Error: specified -o but did not provide a path.\n");
+					exit(-1);
+				}
+			} else if( 0 == strcmp("-i", argv[i]) ) {
+				if( (i+1) < argc ) {
+					inputFilePath.append( argv[i+1] );
+					i = i + 1;
+				} else {
+					fprintf(stderr, "Error: specified -i but did not provide an input path.\n");
+					exit(-1);
+				}
+			} else if(  0 == strcmp("-help", argv[i]) ||
+						0 == strcmp("--help", argv[i]) ||
+						0 == strcmp("-h", argv[i]) ) {
+					
+				printf("sst-juno-asm [-i <input file>] [-o <output file>]\n");
+				printf("\n");
+				printf("<input file>   File to read in, if not specified stdin\n");
+				printf("<output file>  File to write to, if not specified stdout.\n");
+				printf("\n");
+				exit(0);
+			} else {
+				fprintf(stderr, "Unknown option: \"%s\"\n", argv[i]);
+				exit(-1);
+			}
+		}
+		
+		if( "" == inputFilePath ) {
+			inputFile = stdin;
+		} else {
+			inputFile = fopen( inputFilePath.c_str(), "r" );
+			inputFilePath = "-";
+		}
+		
+		if( "" == outputFilePath ) {
+			outputFile = stdout;
+		} else {
+			outputFile = fopen( outputFilePath.c_str(), "w" );
+			outputFilePath = "-";
+		}
+	}
+
 	AssemblerOptions() {
 		inputFilePath = "-";
 		outputFilePath = "-";
