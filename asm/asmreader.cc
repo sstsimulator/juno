@@ -29,7 +29,7 @@ int64_t AssemblyReader::convertLiteralFromString(const char* litStr) {
 	}
 
 	if( '$' != litStr[0] ) {
-		fprintf(stderr, "Error: literal string \"%s\" does not start with a $.\n");
+		fprintf(stderr, "Error: literal string \"%s\" does not start with a $.\n", litStr);
 		exit(-1);
 	}
 
