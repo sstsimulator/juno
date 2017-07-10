@@ -1,14 +1,18 @@
 #ifndef _SST_JUNO_CPU_H
 #define _SST_JUNO_CPU_H
 
+#include <sst/core/sst_config.h>
 #include <sst/core/component.h>
 #include <sst/core/elementinfo.h>
+
+#include <sst/core/interfaces/simpleMem.h>
 
 #include "junoprogreader.h"
 #include "junoregfile.h"
 #include "junoinstmgr.h"
 #include "junocpuinst.h"
 
+using namespace SST::Interfaces;
 using namespace SST::Juno;
 
 namespace SST {
@@ -24,6 +28,7 @@ public:
 	void finish();
 
 	bool clockTick( SST::Cycle_t currentCycle );
+	void handleEvent( SimpleMem::Request* ev );
 
 	SST_ELI_REGISTER_COMPONENT(
 		JunoCPU,
@@ -38,7 +43,12 @@ public:
 		{ "printFrequency", "How frequently to print a message from the component", "5" },
 		{ "repeats", "Number of repetitions to make", "10" },
 		{ "program", "The assembly file to run.", "" },
-		{ "verbose", "Sets the verbosity level of output.", "0" }
+		{ "verbose", "Sets the verbosity level of output.", "0" },
+		{ "clock", "Clock for the CPU", "1GHz" }
+	)
+
+	SST_ELI_DOCUMENT_PORTS(
+		{ "cache_link", "Connects the CPU to the cache", {} }
 	)
 
 private:
@@ -48,6 +58,8 @@ private:
 	uint64_t pc;
 
 	uint64_t cyclesExecuted;
+
+	SimpleMem* mem;
 
 	SST::Cycle_t instCyclesLeft;
 

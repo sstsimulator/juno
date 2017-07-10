@@ -27,11 +27,33 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 		output.fatal(CALL_INFO, -1, "Error: printFrequency must be greater than zero.\n");
 	}
 
+	std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.memInterface");
+	output.verbose(CALL_INFO, 1, 0, "Loading memory interface: %s ...\n", memIFace.c_str());
+
+	Params interfaceParams = params.find_prefix_params("meminterface.");
+
+	mem = dynamic_cast<SimpleMem*>( loadModuleWithComponent(memIFace, this, interfaceParams) );
+
+	if( NULL == mem ) {
+		output.fatal(CALL_INFO, -1, "Error: unable to load %s memory interface.\n", memIFace.c_str());
+	} else {
+		output.verbose(CALL_INFO, 1, 0, "Successfully loaded memory interface.\n");
+	}
+
+	bool init_link_success = mem->initialize("cache_link", new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent) );
+
+	if( init_link_success ) {
+		output.verbose(CALL_INFO, 1, 0, "Cache link (via SimpleMem) initialized successfully\n");
+	} else {
+		output.fatal(CALL_INFO, -1, "Cache link was not initialized successfully\n");
+	}
+
 	output.verbose(CALL_INFO, 1, 0, "Config: maxRepeats=%" PRIu64 ", printFreq=%" PRIu64 "\n",
 		static_cast<uint64_t>(maxRepeats), static_cast<uint64_t>(printFreq));
 
 	// Just register a plain clock for this simple example
-    	registerClock("100MHz", new SST::Clock::Handler<JunoCPU>(this, &JunoCPU::clockTick));
+	std::string cpuClock = params.find<std::string>("clock", "1GHz");
+    	registerClock(cpuClock, new SST::Clock::Handler<JunoCPU>(this, &JunoCPU::clockTick));
 
 	// Tell SST to wait until we authorize it to exit
     	registerAsPrimaryComponent();
@@ -72,6 +94,11 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 JunoCPU::~JunoCPU() {
 	delete progReader;
 	delete regFile;
+	delete mem;
+}
+
+void JunoCPU::handleEvent( SimpleMem::Request* ev ) {
+	output.verbose(CALL_INFO, 2, 0, "Recv Event from Cache.\n");
 }
 
 void JunoCPU::setup() {
