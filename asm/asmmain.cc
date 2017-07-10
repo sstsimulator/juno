@@ -32,6 +32,8 @@ int main(int argc, char* argv[]) {
 	printf("Writing binary...\n");
 	program->writeBinary( options->getOutputFile() );
 
+	printf("Completed.\n");
+
 	delete program;
 	delete reader;
 	delete options;
