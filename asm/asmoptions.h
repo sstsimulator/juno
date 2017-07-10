@@ -19,6 +19,7 @@ public:
 		for(int i = 1; i < argc; ++i) {
 			if( 0 == strcmp("-o", argv[i]) ) {
 				if( (i+1) < argc ) {
+					outputFilePath.clear();
 					outputFilePath.append( argv[i+1] );
 					i = i + 1;
 				} else {
@@ -27,6 +28,7 @@ public:
 				}
 			} else if( 0 == strcmp("-i", argv[i]) ) {
 				if( (i+1) < argc ) {
+					inputFilePath.clear();
 					inputFilePath.append( argv[i+1] );
 					i = i + 1;
 				} else {
