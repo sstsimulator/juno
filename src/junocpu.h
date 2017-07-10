@@ -47,7 +47,14 @@ public:
 		{ "repeats", "Number of repetitions to make", "10" },
 		{ "program", "The assembly file to run.", "" },
 		{ "verbose", "Sets the verbosity level of output.", "0" },
-		{ "clock", "Clock for the CPU", "1GHz" }
+		{ "clock", "Clock for the CPU", "1GHz" },
+		{ "cycles-add", "Cycles to spend on an ADD operation", "1"},
+		{ "cycles-sub", "Cycles to spend on an SUB operation", "1"},
+		{ "cycles-mul", "Cycles to spend on an MUL operation", "2"},
+		{ "cycles-div", "Cycles to spend on an DIV operation", "6"},
+		{ "cycles-and", "Cycles to spend on an AND operation", "1"},
+		{ "cycles-xor", "Cycles to spend on an XOR operation", "1"},
+		{ "cycles-or",  "Cycles to spend on an OR operation", "1"}
 	)
 
 	SST_ELI_DOCUMENT_PORTS(
@@ -67,10 +74,15 @@ private:
 
 	SST::Cycle_t instCyclesLeft;
 
+	SST::Cycle_t addCycles;
+	SST::Cycle_t subCycles;
+	SST::Cycle_t divCycles;
+	SST::Cycle_t mulCycles;
+	SST::Cycle_t andCycles;
+	SST::Cycle_t orCycles;
+	SST::Cycle_t xorCycles;
+
 	SST::Output output;
-	SST::Cycle_t printFreq;
-	SST::Cycle_t maxRepeats;
-	SST::Cycle_t repeats;
 
 };
 

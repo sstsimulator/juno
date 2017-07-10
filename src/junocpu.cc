@@ -14,20 +14,13 @@
 using namespace SST::Juno;
 
 JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
-	SST::Component(id), repeats(0) {
+	SST::Component(id) {
 
 	cyclesExecuted = 0;
 
 	int verbosity = params.find<int>("verbose");
 
 	output.init("Juno-" + getName() + "-> ", verbosity, 0, SST::Output::STDOUT);
-
-	printFreq  = params.find<SST::Cycle_t>("printFrequency", 5);
-	maxRepeats = params.find<SST::Cycle_t>("repeats", 10);
-
-	if( ! (printFreq > 0) ) {
-		output.fatal(CALL_INFO, -1, "Error: printFrequency must be greater than zero.\n");
-	}
 
 	std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.memInterface");
 	output.verbose(CALL_INFO, 1, 0, "Loading memory interface: %s ...\n", memIFace.c_str());
@@ -49,9 +42,6 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 	} else {
 		output.fatal(CALL_INFO, -1, "Cache link was not initialized successfully\n");
 	}
-
-	output.verbose(CALL_INFO, 1, 0, "Config: maxRepeats=%" PRIu64 ", printFreq=%" PRIu64 "\n",
-		static_cast<uint64_t>(maxRepeats), static_cast<uint64_t>(printFreq));
 
 	// Just register a plain clock for this simple example
 	std::string cpuClock = params.find<std::string>("clock", "1GHz");
@@ -93,6 +83,16 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 	output.verbose(CALL_INFO, 1, 0, "Creating load/store unit...\n");
 
 	ldStUnit = new JunoLoadStoreUnit( &output, mem, regFile );
+
+	output.verbose(CALL_INFO, 1, 0, "Loading operation cycle counts...\n");
+
+	addCycles = params.find<SST::Cycle_t>("cycles-add", 1);
+	subCycles = params.find<SST::Cycle_t>("cycles-sub", 1);
+	mulCycles = params.find<SST::Cycle_t>("cycles-mul", 1);
+	divCycles = params.find<SST::Cycle_t>("cycles-div", 1);
+	andCycles = params.find<SST::Cycle_t>("cycles-and", 1);
+	xorCycles = params.find<SST::Cycle_t>("cycles-xor", 1);
+	orCycles  = params.find<SST::Cycle_t>("cycles-or", 1);
 
 	output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
@@ -155,9 +155,7 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 
 	output.verbose(CALL_INFO, 2, 0, "Cycle: %" PRIu64 "\n", static_cast<uint64_t>(currentCycle));
 
-	if( instCyclesLeft > 0 ) {
-		instCyclesLeft--;
-	} else {
+	if( 0 == instCyclesLeft ) {
 		if( ldStUnit->operationsPending() ) {
 			output.verbose(CALL_INFO, 16, 0, "Memory operation pending, no instructions this cycle.\n");
 		} else if( instMgr->instReady( pc ) ) {
@@ -171,6 +169,7 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 			switch( nextInstOp ) {
 			case JUNO_NOOP :
 				pc += 4;
+				instCyclesLeft = 1;
 				break;
 
 			case JUNO_LOAD :
@@ -189,36 +188,43 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 			case JUNO_ADD :
 				executeAdd( output, nextInst, regFile );
 				pc += 4;
+				instCyclesLeft = addCycles;
 				break;
 
 			case JUNO_SUB :
 				executeSub( output, nextInst, regFile );
 				pc += 4;
+				instCyclesLeft = subCycles;
 				break;
 
 			case JUNO_MUL :
 				executeMul( output, nextInst, regFile );
 				pc += 4;
+				instCyclesLeft = mulCycles;
 				break;
 
 			case JUNO_DIV :
 				executeDiv( output, nextInst, regFile );
 				pc += 4;
+				instCyclesLeft = divCycles;
 				break;
 
 			case JUNO_AND :
 				executeAnd( output, nextInst, regFile );
 				pc += 4;
+				instCyclesLeft = andCycles;
 				break;
 
 			case JUNO_OR :
 				executeOr( output, nextInst, regFile );
 				pc += 4;
+				instCyclesLeft = subCycles;
 				break;
 
 			case JUNO_XOR :
 				executeXor( output, nextInst, regFile );
 				pc += 4;
+				instCyclesLeft = xorCycles;
 				break;
 
 			case JUNO_NOT :
@@ -249,6 +255,12 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 			}
 
 		}
+	} else {
+		output.verbose(CALL_INFO, 4, 0, "CPU still busy (%" PRIu64 " cycles to go.\n", static_cast<uint64_t>(instCyclesLeft));
+	}
+
+	if( instCyclesLeft > 0 ) {
+		instCyclesLeft--;
 	}
 
 	return false;
