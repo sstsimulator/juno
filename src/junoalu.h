@@ -10,7 +10,7 @@
 namespace SST {
 namespace Juno {
 
-void executeAdd( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* regFile ) {
+void executeAdd( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
 	const uint8_t opLeft    = inst->getReadReg1();
                                	const uint8_t opRight   = inst->getReadReg2();
                                 const uint8_t resultReg = inst->getWriteReg();
@@ -26,7 +26,7 @@ void executeAdd( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* re
       regFile->writeReg( resultReg, result );
 };
 
-void executeSub( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* regFile ) {
+void executeSub( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
 	const uint8_t opLeft    = inst->getReadReg1();
                                	const uint8_t opRight   = inst->getReadReg2();
                                 const uint8_t resultReg = inst->getWriteReg();
@@ -42,7 +42,7 @@ void executeSub( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* re
       regFile->writeReg( resultReg, result );
 };
 
-void executeDiv( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* regFile ) {
+void executeDiv( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
 	const uint8_t opLeft    = inst->getReadReg1();
                                	const uint8_t opRight   = inst->getReadReg2();
                                 const uint8_t resultReg = inst->getWriteReg();
@@ -58,7 +58,7 @@ void executeDiv( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* re
       regFile->writeReg( resultReg, result );
 };
 
-void executeMul( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* regFile ) {
+void executeMul( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
 	const uint8_t opLeft    = inst->getReadReg1();
                                	const uint8_t opRight   = inst->getReadReg2();
                                 const uint8_t resultReg = inst->getWriteReg();
@@ -74,7 +74,7 @@ void executeMul( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* re
       regFile->writeReg( resultReg, result );
 };
 
-void executeAnd( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* regFile ) {
+void executeAnd( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
 	const uint8_t opLeft    = inst->getReadReg1();
                                	const uint8_t opRight   = inst->getReadReg2();
                                 const uint8_t resultReg = inst->getWriteReg();
@@ -90,7 +90,7 @@ void executeAnd( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* re
       regFile->writeReg( resultReg, result );
 };
 
-void executeOr( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* regFile ) {
+void executeOr( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
 	const uint8_t opLeft    = inst->getReadReg1();
                                	const uint8_t opRight   = inst->getReadReg2();
                                 const uint8_t resultReg = inst->getWriteReg();
@@ -106,7 +106,7 @@ void executeOr( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* reg
       regFile->writeReg( resultReg, result );
 };
 
-void executeXor( SST::Output& output, JunoCPUInstruction* inst, RegisterFile* regFile ) {
+void executeXor( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
 	const uint8_t opLeft    = inst->getReadReg1();
                                	const uint8_t opRight   = inst->getReadReg2();
                                 const uint8_t resultReg = inst->getWriteReg();

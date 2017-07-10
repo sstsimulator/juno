@@ -5,6 +5,7 @@
 #include "junoinstmgr.h"
 
 #include "junoldstdecode.h"
+#include "junoldstunit.h"
 #include "junojumpctrl.h"
 #include "junoalu.h"
 
@@ -60,10 +61,6 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
     	registerAsPrimaryComponent();
     	primaryComponentDoNotEndSim();
 
-	int maxReg = params.find<int>("registers", "8");
-	output.verbose(CALL_INFO, 1, 0, "Creating a register file of %d 64-bit integer registers...\n", maxReg);
-	regFile = new RegisterFile(maxReg);
-
 	std::string progFile = params.find<std::string>("program", "");
 
 	if( "" == progFile ) {
@@ -89,6 +86,14 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 
 	output.verbose(CALL_INFO, 1, 0, "PC set to: %" PRIu64 "\n", pc);
 
+	int maxReg = params.find<int>("registers", "8");
+	output.verbose(CALL_INFO, 1, 0, "Creating a register file of %d 64-bit integer registers...\n", maxReg);
+	regFile = new JunoRegisterFile(&output, maxReg, &pc, progReader->getDataLength() + progReader->getInstLength() );
+
+	output.verbose(CALL_INFO, 1, 0, "Creating load/store unit...\n");
+
+	ldStUnit = new JunoLoadStoreUnit( &output, mem, regFile );
+
 	output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
 
@@ -99,7 +104,23 @@ JunoCPU::~JunoCPU() {
 }
 
 void JunoCPU::handleEvent( SimpleMem::Request* ev ) {
-	output.verbose(CALL_INFO, 2, 0, "Recv Event from Cache.\n");
+	output.verbose(CALL_INFO, 4, 0, "Recv response from cache\n");
+
+	if( ev->cmd == Interfaces::SimpleMem::Request::Command::ReadResp ) {
+		// Read request needs some special handling
+		uint8_t regTarget = ldStUnit->lookupEntry( ev->id );
+		int64_t newValue = 0;
+
+		memcpy( (void*) &newValue, &ev->data[0], sizeof(newValue) );
+
+		output.verbose(CALL_INFO, 8, 0, "Response to a read, payload=%" PRId64 ", for reg: %" PRIu8 "\n", newValue, regTarget);
+
+		regFile->writeReg(regTarget, newValue);
+	}
+
+	ldStUnit->removeEntry( ev->id );
+
+	output.verbose(CALL_INFO, 4, 0, "Complete cache response handling.\n");
 }
 
 void JunoCPU::init( unsigned int phase ) {
@@ -137,7 +158,9 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 	if( instCyclesLeft > 0 ) {
 		instCyclesLeft--;
 	} else {
-		if( instMgr->instReady( pc ) ) {
+		if( ldStUnit->operationsPending() ) {
+			output.verbose(CALL_INFO, 16, 0, "Memory operation pending, no instructions this cycle.\n");
+		} else if( instMgr->instReady( pc ) ) {
 			output.verbose(CALL_INFO, 2, 0, "Next Instruction, PC=%" PRId64 "...\n", pc);
 
 			JunoCPUInstruction* nextInst = instMgr->getInstruction( pc );
@@ -155,7 +178,7 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 				break;
 
 			case JUNO_LOAD_ADDR:
-				executeLDA( output, nextInst, regFile, mem );
+				executeLDA( output, nextInst, regFile, ldStUnit );
 				pc += 4;
 				break;
 

@@ -244,7 +244,7 @@ public:
 			exit(-1);
 		}
 
-		uint64_t litAddr = static_cast<uint64_t>( index * 4 );
+		uint64_t litAddr = static_cast<uint64_t>( index * 8 );
                 uint64_t reg64   = static_cast<uint64_t>( loadReg );
 
                 uint64_t finalInst = static_cast<uint64_t>(junoCode) + (reg64 << 24) + ((litAddr & 0xFFFF) << 8);
@@ -288,7 +288,7 @@ public:
 			exit(-1);
 		}
 
-		uint64_t litAddr = static_cast<uint64_t>( index * 4 );
+		uint64_t litAddr = static_cast<uint64_t>( index * 8 );
                 uint64_t reg64   = static_cast<uint64_t>( storeReg );
 
 		uint64_t finalInst = static_cast<uint64_t>(junoCode) + (reg64 << 8) + ((litAddr & 0xFFFF) << 16);

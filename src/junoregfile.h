@@ -7,17 +7,19 @@
 namespace SST {
 namespace Juno {
 
-class RegisterFile {
+class JunoRegisterFile {
 
 public:
-	RegisterFile( const int regCount ) :
-		maxReg(regCount) {
+	JunoRegisterFile( SST::Output* out, const int regCount, uint64_t* pcIn, const uint64_t dynDataStart ) :
+		pc(pcIn), output(out), maxReg(regCount), dynDataLoc(dynDataStart) {
+
+		output->verbose(CALL_INFO, 2, 0, "Creating %d registers...\n", regCount);
 
 		registers = (int64_t*) malloc( sizeof(int64_t) * regCount );
 		clear();
 	}
 
-	~RegisterFile() {
+	~JunoRegisterFile() {
 		free(registers);
 	}
 
@@ -27,15 +29,33 @@ public:
 		}
 	}
 
-	int64_t readReg(const int reg) const {
-		return registers[reg];
+	int64_t readReg(const uint8_t reg) const {
+		if( 0 == reg ) {
+			return static_cast<int64_t>( *pc );
+		} else if( 1 == reg ) {
+			return static_cast<int64_t>(dynDataLoc);
+		} else {
+			return registers[reg];
+		}
 	}
 
-	void writeReg(const int reg, int64_t val) {
-		registers[reg] = val;
+	void writeReg(const uint8_t reg, int64_t val) {
+		if( reg >= maxReg ) {
+			output->fatal(CALL_INFO, -1, "Accessed register %" PRIu8 ", but max is: %d.\n", reg, maxReg);
+		} else if( reg <= 1 ) {
+			output->fatal(CALL_INFO, -1, "Attempting write to register %" PRIu8 " but r0 and r1 are hardware reserved.\n",
+				reg);
+		} else {
+			output->verbose(CALL_INFO, 16, 0, "Writing %" PRId64 " into register %" PRIu8 "...\n",
+				val, reg);
+			registers[reg] = val;
+		}
 	}
 
 protected:
+	uint64_t* pc;
+	uint64_t dynDataLoc;
+	SST::Output* output;
 	const int maxReg;
 	int64_t* registers;
 

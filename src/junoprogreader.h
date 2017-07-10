@@ -22,8 +22,15 @@ public:
 		output->verbose(CALL_INFO, 1, 0, "Inst Length:              %" PRIu64 "\n", instLen);
 
 		programBinary = (char*) malloc( sizeof(char) * (dataLen + instLen));
-
 		fread( (void*) programBinary, sizeof(char), (dataLen + instLen), appBinary );
+
+		for( uint64_t i = 0; i < dataLen; i += 8 ) {
+			int64_t tmp = 0;
+			memcpy( (void*) &tmp, (void*) &programBinary[i], sizeof(tmp) );
+
+			output->verbose(CALL_INFO, 2, 0, " -> %8" PRIu64 " : %" PRId64 "\n", i, tmp );
+		}
+
 	}
 
 	~JunoProgramReader() {

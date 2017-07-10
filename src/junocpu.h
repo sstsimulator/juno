@@ -7,6 +7,7 @@
 
 #include <sst/core/interfaces/simpleMem.h>
 
+#include "junoldstunit.h"
 #include "junoprogreader.h"
 #include "junoregfile.h"
 #include "junoinstmgr.h"
@@ -55,8 +56,9 @@ public:
 
 private:
 	JunoProgramReader* progReader;
-	RegisterFile* regFile;
+	JunoRegisterFile* regFile;
 	JunoInstructionMgr* instMgr;
+	JunoLoadStoreUnit* ldStUnit;
 	uint64_t pc;
 
 	uint64_t cyclesExecuted;
