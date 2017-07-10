@@ -176,14 +176,18 @@ public:
 				generateBinaryOperand( JUNO_OR, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "XOR" ) {
 				generateBinaryOperand( JUNO_XOR, curOp, binaryOp );
-			} else if( curOp->getInstCode() == "JUMP" ) {
-				generatePCRJump( JUNO_PCR_JUMP, curOp, binaryOp, static_cast<uint64_t>(i) );
+//			} else if( curOp->getInstCode() == "JUMP" ) {
+//				generatePCRJump( JUNO_PCR_JUMP, curOp, binaryOp, static_cast<uint64_t>(i) );
 			} else if( curOp->getInstCode() == "JZERO" ) {
 				generatePCRRegJump( JUNO_PCR_JUMP_ZERO, curOp, binaryOp, static_cast<uint64_t>(i) );
 			} else if( curOp->getInstCode() == "JLTZ" ) {
 				generatePCRRegJump( JUNO_PCR_JUMP_LTZ, curOp, binaryOp, static_cast<uint64_t>(i) );
 			} else if( curOp->getInstCode() == "JGTZ" ) {
 				generatePCRRegJump( JUNO_PCR_JUMP_GTZ, curOp, binaryOp, static_cast<uint64_t>(i) );
+			} else if( curOp->getInstCode() == "LDA" ) {
+				generateLoadAddr( JUNO_LOAD_ADDR, curOp, binaryOp );
+			} else if( curOp->getInstCode() == "STA" ) {
+				generateLoadAddr( JUNO_STORE_ADDR, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "HALT" ) {
 				const uint8_t junoCode = JUNO_HALT;
 				const uint8_t zero     = 0;
@@ -200,6 +204,95 @@ public:
 
 			fwrite( &binaryOp[0], sizeof(char), 4, binary );
 		}
+	}
+
+	void generateLoadAddr(const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp ) {
+
+		if( curOp->countOperands() != 2 ) {
+                        fprintf(stderr, "Error: store-instruction %s must have two operands.\n", curOp->getInstCode().c_str());
+                        exit(-1);
+                }
+
+                if( curOp->getOperand(1)->getType() != REGISTER_OPERAND ) {
+                        fprintf(stderr, "Error: load-instruction, second operand must be a register.\n");
+                        exit(-1);
+                }
+
+                AssemblyRegisterOperand* regOp = dynamic_cast<AssemblyRegisterOperand*>(curOp->getOperand(1));
+
+                const uint8_t loadReg = regOp->getRegister();
+
+                if( curOp->getOperand(0)->getType() != LITERAL_OPERAND ) {
+                        fprintf(stderr, "Error: load-addr, first operand must be a literal.\n");
+                        exit(-1);
+                }
+
+                AssemblyLiteralOperand* litOp = dynamic_cast<AssemblyLiteralOperand*>(curOp->getOperand(0));
+                uint64_t litVal  = static_cast<uint64_t>( litOp->getLiteral() );
+
+		int index = -1;
+
+		for( int i = 0; i < int64Literals.size(); ++i ) {
+			if(int64Literals[i] == litVal) {
+				index = i;
+				break;
+			}
+		}
+
+		if( index == -1 ) {
+			fprintf(stderr, "Error: unable to find literal: %" PRId64 "\n", litVal);
+			exit(-1);
+		}
+
+		uint64_t litAddr = static_cast<uint64_t>( index * 4 );
+                uint64_t reg64   = static_cast<uint64_t>( loadReg );
+
+                uint64_t finalInst = static_cast<uint64_t>(junoCode) + (reg64 << 24) + ((litAddr & 0xFFFF) << 8);
+                memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
+        }
+
+	void generateStoreAddr( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp ) {
+		if( curOp->countOperands() != 2 ) {
+			fprintf(stderr, "Error: store-instruction %s must have two operands.\n", curOp->getInstCode().c_str());
+			exit(-1);
+		}
+
+		if( curOp->getOperand(0)->getType() != REGISTER_OPERAND ) {
+			fprintf(stderr, "Error: store-instruction, first operand must be a register.\n");
+			exit(-1);
+		}
+
+		AssemblyRegisterOperand* regOp = dynamic_cast<AssemblyRegisterOperand*>(curOp->getOperand(0));
+
+		const uint8_t storeReg = regOp->getRegister();
+
+		if( curOp->getOperand(1)->getType() != LITERAL_OPERAND ) {
+			fprintf(stderr, "Error: store-addr, second operand must be a literal.\n");
+			exit(-1);
+		}
+
+		AssemblyLiteralOperand* litOp = dynamic_cast<AssemblyLiteralOperand*>(curOp->getOperand(1));
+                uint64_t litVal  = static_cast<uint64_t>( litOp->getLiteral() );
+
+		int index = -1;
+
+		for( int i = 0; i < int64Literals.size(); ++i ) {
+			if(int64Literals[i] == litVal) {
+				index = i;
+				break;
+			}
+		}
+
+		if( index == -1 ) {
+			fprintf(stderr, "Error: unable to find literal: %" PRId64 "\n", litVal);
+			exit(-1);
+		}
+
+		uint64_t litAddr = static_cast<uint64_t>( index * 4 );
+                uint64_t reg64   = static_cast<uint64_t>( storeReg );
+
+		uint64_t finalInst = static_cast<uint64_t>(junoCode) + (reg64 << 8) + ((litAddr & 0xFFFF) << 16);
+		memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
 	}
 
 	void generatePCRJump( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp, uint64_t instLoc ) {

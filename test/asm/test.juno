@@ -1,3 +1,5 @@
+LDA $99 r1
+LDA $10 r2
 ADD r1 r2 r4
 #DIV r2 r4 r2
 MUL r2 r4 r3

@@ -4,6 +4,7 @@
 #include "junocpuinst.h"
 #include "junoinstmgr.h"
 
+#include "junoldst.h"
 #include "junojumpctrl.h"
 #include "junoalu.h"
 
@@ -130,6 +131,11 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 				break;
 
 			case JUNO_LOAD :
+				pc += 4;
+				break;
+
+			case JUNO_LOAD_ADDR:
+				executeLDA( output, nextInst, regFile, mem );
 				pc += 4;
 				break;
 
