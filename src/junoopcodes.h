@@ -17,7 +17,7 @@
 #define JUNO_XOR           34
 #define JUNO_NOT           35
 
-#define JUNO_PCR_JUMP      128
+//// DEPRECATED #define JUNO_PCR_JUMP      128
 #define JUNO_PCR_JUMP_ZERO 129
 #define JUNO_PCR_JUMP_LTZ  130
 #define JUNO_PCR_JUMP_GTZ  131

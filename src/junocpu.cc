@@ -149,26 +149,25 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 				pc += 4;
 				break;
 
-			case JUNO_PCR_JUMP:
-				pc += 4;
-				break;
-
 			case JUNO_PCR_JUMP_ZERO:
 				executeJumpZero( output, nextInst, regFile, &pc );
 				break;
 
 			case JUNO_PCR_JUMP_LTZ:
-				pc += 4;
+				executeJumpLTZ( output, nextInst, regFile, &pc );
 				break;
 
 			case JUNO_PCR_JUMP_GTZ:
-				pc += 4;
+				executeJumpGTZ( output, nextInst, regFile, &pc );
 				break;
 
 			case JUNO_HALT :
 				primaryComponentOKToEndSim();
 				return true;
+
 			default:
+				fprintf(stderr, "ERROR: Unknown instruction encountered.\n");
+				exit(-1);
 				break;
 
 			}
