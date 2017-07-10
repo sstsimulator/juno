@@ -37,6 +37,13 @@ public:
 		int32_t tmp = op & 0xFFFF0000;
 		tmp >>= 16;
 
+		return static_cast<int16_t>( tmp & 0xFFFF );
+	}
+
+	uint16_t get16bAbsAddr() const {
+		int32_t tmp = op & 0x00FFFF00;
+		tmp >>= 8;
+
 		return static_cast<uint16_t>( tmp & 0xFFFF );
 	}
 

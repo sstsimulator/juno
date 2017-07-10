@@ -27,6 +27,8 @@ public:
 	void setup();
 	void finish();
 
+	void init( unsigned int phase );
+
 	bool clockTick( SST::Cycle_t currentCycle );
 	void handleEvent( SimpleMem::Request* ev );
 

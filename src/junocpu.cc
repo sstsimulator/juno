@@ -4,7 +4,7 @@
 #include "junocpuinst.h"
 #include "junoinstmgr.h"
 
-#include "junoldst.h"
+#include "junoldstdecode.h"
 #include "junojumpctrl.h"
 #include "junoalu.h"
 
@@ -100,6 +100,26 @@ JunoCPU::~JunoCPU() {
 
 void JunoCPU::handleEvent( SimpleMem::Request* ev ) {
 	output.verbose(CALL_INFO, 2, 0, "Recv Event from Cache.\n");
+}
+
+void JunoCPU::init( unsigned int phase ) {
+	if( 0 == phase ) {
+		const int initLen = progReader->getDataLength() + progReader->getInstLength();
+
+		std::vector<uint8_t> exeImage;
+		exeImage.reserve( initLen );
+
+		for( int i = 0; i < initLen; ++i ) {
+			exeImage.push_back( progReader->getBinaryBuffer()[i] );
+		}
+
+		SimpleMem::Request* writeExe = new SimpleMem::Request(SimpleMem::Request::Write, 0, exeImage.size(), exeImage);
+		output.verbose(CALL_INFO, 1, 0, "Sending initialization data to memory...\n");
+
+		mem->sendInitData(writeExe);
+
+		output.verbose(CALL_INFO, 1, 0, "Initialization data sent.\n");
+	}
 }
 
 void JunoCPU::setup() {
