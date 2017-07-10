@@ -81,7 +81,8 @@ public:
 			}
 		}
 
-		printf("Literal collection done (collected: %d literals)\n", int64Literals.size());
+		printf("Literal collection done (collected: %" PRIu64 " literals)\n",
+			static_cast<uint64_t>(int64Literals.size()));
 	}
 
 	void addLabel( const std::string labelText, const uint64_t loc ) {
