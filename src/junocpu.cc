@@ -20,7 +20,7 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 
 	int verbosity = params.find<int>("verbose");
 
-	output.init("Juno-" + getName() + "-> ", verbosity, 0, SST::Output::STDOUT);
+	output.init("Juno[" + getName() + "]: ", verbosity, 0, SST::Output::STDOUT);
 
 	std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.memInterface");
 	output.verbose(CALL_INFO, 1, 0, "Loading memory interface: %s ...\n", memIFace.c_str());
@@ -173,6 +173,7 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 				break;
 
 			case JUNO_LOAD :
+				executeLoad( output, nextInst, regFile, ldStUnit );
 				pc += 4;
 				break;
 
@@ -182,6 +183,7 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 				break;
 
 			case JUNO_STORE :
+				executeStore( output, nextInst, regFile, ldStUnit );
 				pc += 4;
 				break;
 

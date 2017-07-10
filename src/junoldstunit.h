@@ -58,10 +58,10 @@ public:
                 SimpleMem::Request* req = new SimpleMem::Request(SimpleMem::Request::Write, addr, 8);
 
 		std::vector<uint8_t> payload;
-		payload.reserve(8);
+		payload.resize(8);
 		int64_t regValue = regFile->readReg( reg );
 
-		memcpy( (void*) &payload[0], (void*) regValue, sizeof(regValue) );
+		memcpy( (void*) &payload[0], (void*) &regValue, sizeof(regValue) );
 		req->setPayload( payload );
 
                 JunoLoadStoreEntry* entry = new JunoLoadStoreEntry( req->id, reg );

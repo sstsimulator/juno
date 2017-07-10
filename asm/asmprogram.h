@@ -188,6 +188,10 @@ public:
 				generateLoadAddr( JUNO_LOAD_ADDR, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "STA" ) {
 				generateLoadAddr( JUNO_STORE_ADDR, curOp, binaryOp );
+			} else if( curOp->getInstCode() == "LOAD" ) {
+				generateLoad( JUNO_LOAD, curOp, binaryOp );
+			} else if (curOp->getInstCode() == "STORE" ) {
+				generateStore( JUNO_STORE, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "HALT" ) {
 				const uint8_t junoCode = JUNO_HALT;
 				const uint8_t zero     = 0;
@@ -204,6 +208,54 @@ public:
 
 			fwrite( &binaryOp[0], sizeof(char), 4, binary );
 		}
+	}
+
+	void generateLoad( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp ) {
+		if( curOp->countOperands() != 2 ) {
+			fprintf(stderr, "Error: load-instruction %s must have two operands.\n", curOp->getInstCode().c_str());
+			exit(-1);
+		}
+
+		if( curOp->getOperand(0)->getType() != REGISTER_OPERAND && curOp->getOperand(1)->getType() != REGISTER_OPERAND ) {
+			fprintf(stderr, "Error: load-instruction can only have register operands and at least one is non-register.\n");
+			exit(-1);
+		}
+
+		AssemblyRegisterOperand* regOpOne = dynamic_cast<AssemblyRegisterOperand*>( curOp->getOperand(0) );
+		AssemblyRegisterOperand* regOpTwo = dynamic_cast<AssemblyRegisterOperand*>( curOp->getOperand(1) );
+
+		const uint8_t regOne = regOpOne->getRegister();
+		const uint8_t regTwo = regOpTwo->getRegister();
+
+		const uint64_t regOne64 = static_cast<uint64_t>(regOne);
+		const uint64_t regTwo64 = static_cast<uint64_t>(regTwo);
+
+		uint64_t finalInst = static_cast<uint64_t>(junoCode) + (regTwo64 << 24) + (regOne64 << 8);
+                memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
+	}
+
+	void generateStore( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp ) {
+		if( curOp->countOperands() != 2 ) {
+			fprintf(stderr, "Error: store-instruction %s must have two operands.\n", curOp->getInstCode().c_str());
+			exit(-1);
+		}
+
+		if( curOp->getOperand(0)->getType() != REGISTER_OPERAND && curOp->getOperand(1)->getType() != REGISTER_OPERAND ) {
+			fprintf(stderr, "Error: store-instruction can only have register operands and at least one is non-register.\n");
+			exit(-1);
+		}
+
+		AssemblyRegisterOperand* regOpOne = dynamic_cast<AssemblyRegisterOperand*>( curOp->getOperand(0) );
+		AssemblyRegisterOperand* regOpTwo = dynamic_cast<AssemblyRegisterOperand*>( curOp->getOperand(1) );
+
+		const uint8_t regOne = regOpOne->getRegister();
+		const uint8_t regTwo = regOpTwo->getRegister();
+
+		const uint64_t regOne64 = static_cast<uint64_t>(regOne);
+		const uint64_t regTwo64 = static_cast<uint64_t>(regTwo);
+
+		uint64_t finalInst = static_cast<uint64_t>(junoCode) + (regTwo64 << 16) + (regOne64 << 8);
+                memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
 	}
 
 	void generateLoadAddr(const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp ) {
