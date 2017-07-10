@@ -4,6 +4,7 @@
 #include "junocpuinst.h"
 #include "junoinstmgr.h"
 
+#include "junojumpctrl.h"
 #include "junoalu.h"
 
 #include "instmgr/junofixedprogmgr.h"
@@ -12,6 +13,8 @@ using namespace SST::Juno;
 
 JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 	SST::Component(id), repeats(0) {
+
+	cyclesExecuted = 0;
 
 	int verbosity = params.find<int>("verbose");
 
@@ -76,7 +79,7 @@ void JunoCPU::setup() {
 }
 
 void JunoCPU::finish() {
-	output.verbose(CALL_INFO, 1, 0, "Component is being finished.\n");
+	output.verbose(CALL_INFO, 1, 0, "Component is being finished (executed: %" PRId64 " cycles)\n", cyclesExecuted);
 }
 
 bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
@@ -113,26 +116,32 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 				break;
 
 			case JUNO_SUB :
+				executeSub( output, nextInst, regFile );
 				pc += 4;
 				break;
 
 			case JUNO_MUL :
+				executeMul( output, nextInst, regFile );
 				pc += 4;
 				break;
 
 			case JUNO_DIV :
+				executeDiv( output, nextInst, regFile );
 				pc += 4;
 				break;
 
 			case JUNO_AND :
+				executeAnd( output, nextInst, regFile );
 				pc += 4;
 				break;
 
 			case JUNO_OR :
+				executeOr( output, nextInst, regFile );
 				pc += 4;
 				break;
 
 			case JUNO_XOR :
+				executeXor( output, nextInst, regFile );
 				pc += 4;
 				break;
 
@@ -145,7 +154,7 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 				break;
 
 			case JUNO_PCR_JUMP_ZERO:
-				pc += 4;
+				executeJumpZero( output, nextInst, regFile, &pc );
 				break;
 
 			case JUNO_PCR_JUMP_LTZ:

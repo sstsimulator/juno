@@ -47,6 +47,8 @@ private:
 	JunoInstructionMgr* instMgr;
 	uint64_t pc;
 
+	uint64_t cyclesExecuted;
+
 	SST::Cycle_t instCyclesLeft;
 
 	SST::Output output;

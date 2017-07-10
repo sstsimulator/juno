@@ -250,8 +250,10 @@ public:
 		AssemblyLabelOperand* labelOp = dynamic_cast<AssemblyLabelOperand*>(curOp->getOperand(1));
 
 		const int64_t jumpLoc = static_cast<int64_t>( labelMap.find(labelOp->getLabel())->second );
-		const int64_t locDiff = static_cast<int64_t>( instLoc ) - jumpLoc;
+		const int64_t locDiff = jumpLoc - static_cast<int64_t>( instLoc );
 		const int16_t jumpBy16b = static_cast<int16_t>( locDiff );
+
+		printf("PCR-J-Class Generated with diff: %" PRId64 " -> (16b Encode) -> %" PRId16 "\n", locDiff, jumpBy16b);
 
 		memcpy( (void*) &binaryOp[2], (void*) &jumpBy16b, sizeof(jumpBy16b) );
 	}

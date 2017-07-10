@@ -12,6 +12,7 @@ class JunoCPUInstruction {
 
 public:
 	JunoCPUInstruction( const int32_t opCode ) : op(opCode) {}
+
 	~JunoCPUInstruction() {}
 
 	uint8_t getInstCode() const {
@@ -19,15 +20,31 @@ public:
 	}
 
 	uint8_t getReadReg1() const {
-		return op & 0xFF00;
+		int32_t tmp = op & 0xFF00;
+		tmp >>= 8;
+
+		return static_cast<uint8_t>( tmp & 0xFF );
 	}
 
 	uint8_t getReadReg2() const {
-		return op & 0xFF0000;
+		int32_t tmp = op & 0xFF0000;
+		tmp >>= 16;
+
+		return static_cast<uint8_t>( tmp & 0xFF );
+	}
+
+	int16_t get16bJumpOffset() const {
+		int32_t tmp = op & 0xFFFF0000;
+		tmp >>= 16;
+
+		return static_cast<uint16_t>( tmp & 0xFFFF );
 	}
 
 	uint8_t getWriteReg() const {
-		return op & 0xFF000000;
+		int32_t tmp = op & 0xFF000000;
+		tmp >>= 24;
+
+		return static_cast<uint8_t>( tmp & 0xFF );
 	}
 
 protected:
