@@ -56,7 +56,14 @@ namespace SST {
                                     { "cycles-xor", "Cycles to spend on an XOR operation", "1"},
                                     { "cycles-or",  "Cycles to spend on an OR operation", "1"}
                                     )
-            
+
+	    SST_ELI_DOCUMENT_STATISTICS(
+				   { "cycles", "Cycles the CPU was active", "cycles", 1 },
+		  		   { "instructions", "Instructions executed by the CPU", "instructions", 1 },
+				   { "mem-reads", "Memory reads issued by the CPU", "instructions", 1 },
+				   { "mem-writes", "Memory writes issued by the CPU", "instructions", 1 }
+				   )
+
             SST_ELI_DOCUMENT_PORTS(
                                    { "cache_link", "Connects the CPU to the cache", {} }
                                    )
@@ -81,11 +88,15 @@ namespace SST {
             SST::Cycle_t andCycles;
             SST::Cycle_t orCycles;
             SST::Cycle_t xorCycles;
-            
+
             SST::Output output;
-            
+
+	    Statistic<uint64_t>* statCycles;
+	    Statistic<uint64_t>* statInstructions;
+            Statistic<uint64_t>* statMemReads;
+            Statistic<uint64_t>* statMemWrites;
         };
-        
+
     }
 }
 

@@ -92,7 +92,12 @@ SST::Component(id) {
     andCycles = params.find<SST::Cycle_t>("cycles-and", 1);
     xorCycles = params.find<SST::Cycle_t>("cycles-xor", 1);
     orCycles  = params.find<SST::Cycle_t>("cycles-or", 1);
-    
+
+    statCycles       = registerStatistic<uint64_t>( "cycles" );
+    statInstructions = registerStatistic<uint64_t>( "instructions" );
+    statMemReads     = registerStatistic<uint64_t>( "mem-reads" );
+    statMemWrites    = registerStatistic<uint64_t>( "mem-writes" );
+
     output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
 
@@ -151,118 +156,121 @@ void JunoCPU::finish() {
 }
 
 bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
-    
+
+    statCycles->addData(1);
     output.verbose(CALL_INFO, 2, 0, "Cycle: %" PRIu64 "\n", static_cast<uint64_t>(currentCycle));
-    
+
     if( 0 == instCyclesLeft ) {
         if( ldStUnit->operationsPending() ) {
             output.verbose(CALL_INFO, 16, 0, "Memory operation pending, no instructions this cycle.\n");
         } else if( instMgr->instReady( pc ) ) {
             output.verbose(CALL_INFO, 2, 0, "Next Instruction, PC=%" PRId64 "...\n", pc);
-            
+
             JunoCPUInstruction* nextInst = instMgr->getInstruction( pc );
             const uint8_t nextInstOp = nextInst->getInstCode();
-            
+
             output.verbose(CALL_INFO, 4, 0, "Operation code: %" PRIu8 "\n", nextInstOp);
-            
+	    statInstructions->addData(1);
+
             switch( nextInstOp ) {
                 case JUNO_NOOP :
                     pc += 4;
                     instCyclesLeft = 1;
                     break;
-                    
+
                 case JUNO_LOAD :
                     executeLoad( output, nextInst, regFile, ldStUnit );
+		    statMemReads->addData(1);
                     pc += 4;
                     break;
-                    
+
                 case JUNO_LOAD_ADDR:
                     executeLDA( output, nextInst, regFile, ldStUnit );
+		    statMemReads->addData(1);
                     pc += 4;
                     break;
-                    
+
                 case JUNO_STORE :
                     executeStore( output, nextInst, regFile, ldStUnit );
+		    statMemWrites->addData(1);
                     pc += 4;
                     break;
-                    
+
                 case JUNO_ADD :
                     executeAdd( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = addCycles;
                     break;
-                    
+
                 case JUNO_SUB :
                     executeSub( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = subCycles;
                     break;
-                    
+
                 case JUNO_MUL :
                     executeMul( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = mulCycles;
                     break;
-                    
+
                 case JUNO_DIV :
                     executeDiv( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = divCycles;
                     break;
-                    
+
                 case JUNO_AND :
                     executeAnd( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = andCycles;
                     break;
-                    
+
                 case JUNO_OR :
                     executeOr( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = subCycles;
                     break;
-                    
+
                 case JUNO_XOR :
                     executeXor( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = xorCycles;
                     break;
-                    
+
                 case JUNO_NOT :
                     pc += 4;
                     break;
-                    
+
                 case JUNO_PCR_JUMP_ZERO:
                     executeJumpZero( output, nextInst, regFile, &pc );
                     break;
-                    
+
                 case JUNO_PCR_JUMP_LTZ:
                     executeJumpLTZ( output, nextInst, regFile, &pc );
                     break;
-                    
+
                 case JUNO_PCR_JUMP_GTZ:
                     executeJumpGTZ( output, nextInst, regFile, &pc );
                     break;
-                    
+
                 case JUNO_HALT :
                     primaryComponentOKToEndSim();
                     return true;
-                    
+
                 default:
                     fprintf(stderr, "ERROR: Unknown instruction encountered.\n");
                     exit(-1);
                     break;
-                    
             }
-            
         }
     } else {
         output.verbose(CALL_INFO, 4, 0, "CPU still busy (%" PRIu64 " cycles to go.\n", static_cast<uint64_t>(instCyclesLeft));
     }
-    
+
     if( instCyclesLeft > 0 ) {
         instCyclesLeft--;
     }
-    
+
     return false;
 }
