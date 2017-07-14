@@ -231,7 +231,7 @@ public:
 		const uint64_t regOne64 = static_cast<uint64_t>(regOne);
 		const uint64_t regTwo64 = static_cast<uint64_t>(regTwo);
 
-		uint64_t finalInst = static_cast<uint64_t>(junoCode) + (regTwo64 << 24) + (regOne64 << 8);
+		uint32_t finalInst = static_cast<uint32_t>(junoCode) + (regTwo64 << 24) + (regOne64 << 8);
                 memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
 	}
 
@@ -255,7 +255,7 @@ public:
 		const uint64_t regOne64 = static_cast<uint64_t>(regOne);
 		const uint64_t regTwo64 = static_cast<uint64_t>(regTwo);
 
-		uint64_t finalInst = static_cast<uint64_t>(junoCode) + (regTwo64 << 16) + (regOne64 << 8);
+		uint32_t finalInst = static_cast<uint32_t>(junoCode) + (regTwo64 << 16) + (regOne64 << 8);
                 memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
 	}
 
@@ -300,7 +300,7 @@ public:
 		uint64_t litAddr = static_cast<uint64_t>( index * 8 );
                 uint64_t reg64   = static_cast<uint64_t>( loadReg );
 
-                uint64_t finalInst = static_cast<uint64_t>(junoCode) + (reg64 << 24) + ((litAddr & 0xFFFF) << 8);
+                uint32_t finalInst = static_cast<uint32_t>(junoCode) + (reg64 << 24) + ((litAddr & 0xFFFF) << 8);
                 memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
         }
 
@@ -344,7 +344,7 @@ public:
 		uint64_t litAddr = static_cast<uint64_t>( index * 8 );
                 uint64_t reg64   = static_cast<uint64_t>( storeReg );
 
-		uint64_t finalInst = static_cast<uint64_t>(junoCode) + (reg64 << 8) + ((litAddr & 0xFFFF) << 16);
+		uint32_t finalInst = static_cast<uint32_t>(junoCode) + (reg64 << 8) + ((litAddr & 0xFFFF) << 16);
 		memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
 	}
 
