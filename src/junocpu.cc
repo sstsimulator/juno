@@ -89,6 +89,7 @@ SST::Component(id) {
     subCycles = params.find<SST::Cycle_t>("cycles-sub", 1);
     mulCycles = params.find<SST::Cycle_t>("cycles-mul", 1);
     divCycles = params.find<SST::Cycle_t>("cycles-div", 1);
+    modCycles = params.find<SST::Cycle_t>("cycles-mod", 1);
     andCycles = params.find<SST::Cycle_t>("cycles-and", 1);
     xorCycles = params.find<SST::Cycle_t>("cycles-xor", 1);
     orCycles  = params.find<SST::Cycle_t>("cycles-or", 1);
@@ -218,6 +219,12 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
                     executeDiv( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = divCycles;
+                    break;
+
+                case JUNO_MOD :
+                    executeMod( output, nextInst, regFile );
+                    pc += 4;
+                    instCyclesLeft = modCycles;
                     break;
 
                 case JUNO_AND :

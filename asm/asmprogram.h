@@ -3,6 +3,7 @@
 #define _H_SST_JUNO_ASM_PROGRAM
 
 #include "junoopcodes.h"
+#include "asmlocalopcodes.h"
 
 #include <vector>
 #include <map>
@@ -171,6 +172,8 @@ public:
 				generateBinaryOperand( JUNO_MUL, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "DIV" ) {
 				generateBinaryOperand( JUNO_DIV, curOp, binaryOp );
+			} else if( curOp->getInstCode() == "MOD" ) {
+				generateBinaryOperand( JUNO_MOD, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "AND" ) {
 				generateBinaryOperand( JUNO_AND, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "OR" ) {
@@ -191,6 +194,10 @@ public:
 				generateLoadAddr( JUNO_STORE_ADDR, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "LOAD" ) {
 				generateLoad( JUNO_LOAD, curOp, binaryOp );
+			} else if (curOp->getInstCode() == "RAND" ) {
+				generateRand( JUNO_RAND, curOp, binaryOp );
+			} else if (curOp->getInstCode() == "RSEED" ) {
+				generateRandSeed(JUNO_RSEED, curOp, binaryOp );
 			} else if (curOp->getInstCode() == "STORE" ) {
 				generateStore( JUNO_STORE, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "HALT" ) {
@@ -209,6 +216,46 @@ public:
 
 			fwrite( &binaryOp[0], sizeof(char), 4, binary );
 		}
+	}
+
+	void generateRandSeed( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp ) {
+		if( curOp->countOperands() != 1 ) {
+			fprintf(stderr, "Error: rseed-instruction must one operand\n");
+			exit(-1);
+		}
+
+		if( curOp->getOperand(0)->getType() != REGISTER_OPERAND ) {
+			fprintf(stderr, "Error: rseed-instruction can only have register operands.\n");
+			exit(-1);
+		}
+
+		AssemblyRegisterOperand* regOpOne = dynamic_cast<AssemblyRegisterOperand*>( curOp->getOperand(0) );
+		const uint8_t regOne = regOpOne->getRegister();
+
+		const uint64_t regOne64 = static_cast<uint64_t>(regOne);
+
+		uint32_t finalInst = static_cast<uint32_t>(junoCode + (regOne64 << 24));
+		memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
+	}
+
+	void generateRand( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp ) {
+		if( curOp->countOperands() != 1 ) {
+			fprintf(stderr, "Error: rand-instruction must one operand\n");
+			exit(-1);
+		}
+
+		if( curOp->getOperand(0)->getType() != REGISTER_OPERAND ) {
+			fprintf(stderr, "Error: rand-instruction can only have register operands.\n");
+			exit(-1);
+		}
+
+		AssemblyRegisterOperand* regOpOne = dynamic_cast<AssemblyRegisterOperand*>( curOp->getOperand(0) );
+		const uint8_t regOne = regOpOne->getRegister();
+
+		const uint64_t regOne64 = static_cast<uint64_t>(regOne);
+
+		uint32_t finalInst = static_cast<uint32_t>(junoCode + (regOne64 << 24));
+		memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
 	}
 
 	void generateLoad( const uint8_t junoCode, AssemblyOperation* curOp, char* binaryOp ) {

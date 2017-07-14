@@ -57,6 +57,22 @@ namespace SST {
             
             regFile->writeReg( resultReg, result );
         };
+
+        void executeMod( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
+            const uint8_t opLeft    = inst->getReadReg1();
+            const uint8_t opRight   = inst->getReadReg2();
+            const uint8_t resultReg = inst->getWriteReg();
+            
+            const int64_t valLeft   = regFile->readReg(opLeft);
+            const int64_t valRight  = regFile->readReg(opRight);
+            
+            const int64_t result    = valLeft % valRight;
+            
+            output.verbose(CALL_INFO, 4, 0, "MOD[r%3" PRIu8 ", r%3" PRIu8 ", res=r%3" PRIu8 "]: (%" PRId64 " \% %" PRId64 " = %" PRId64 ")\n",
+                           opLeft, opRight, resultReg, valLeft, valRight, result);
+            
+            regFile->writeReg( resultReg, result );
+        };
         
         void executeMul( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
             const uint8_t opLeft    = inst->getReadReg1();

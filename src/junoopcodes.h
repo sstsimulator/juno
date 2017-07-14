@@ -12,6 +12,7 @@
 #define JUNO_SUB           17
 #define JUNO_MUL           18
 #define JUNO_DIV           19
+#define JUNO_MOD           20
 
 #define JUNO_AND           32
 #define JUNO_OR            33
@@ -24,5 +25,9 @@
 #define JUNO_PCR_JUMP_GTZ  131
 
 #define JUNO_HALT          255
+
+// RESERVE but kept in a subcomponent
+// #define JUNO_RAND       200
+// #define JUNO_RSEED      201
 
 #endif
