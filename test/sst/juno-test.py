@@ -10,9 +10,9 @@ sst.setStatisticLoadLevel(4)
 # Define the simulation components
 comp_cpu = sst.Component("cpu", "juno.JunoCPU")
 comp_cpu.addParams({
-	"verbose" : 16,
+	"verbose" : 4,
 	"registers" : 16,
-	"program" : "../test/asm/sum.bin",
+	"program" : "../test/asm/modulo.bin",
 	"clock" : "2.4GHz",
 	"cycles-add" : 1
 })
