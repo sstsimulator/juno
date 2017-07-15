@@ -179,9 +179,19 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
     statCycles->addData(1);
     output.verbose(CALL_INFO, 2, 0, "Cycle: %" PRIu64 "\n", static_cast<uint64_t>(currentCycle));
 
+    bool handlersClear = true;
+    for( int i = 0; i < customHandlers.size(); ++i ) {
+	if( customHandlers[i]->isBusy() ) {
+		handlersClear = false;
+		break;
+	}
+    }
+
     if( 0 == instCyclesLeft ) {
         if( ldStUnit->operationsPending() ) {
             output.verbose(CALL_INFO, 16, 0, "Memory operation pending, no instructions this cycle.\n");
+	} else if( ! handlersClear ) {
+	    output.verbose(CALL_INFO, 2, 0, "Handlers are still busy, no instructions this cycle.\n");
         } else if( instMgr->instReady( pc ) ) {
             output.verbose(CALL_INFO, 2, 0, "Next Instruction, PC=%" PRId64 "...\n", pc);
 
@@ -293,7 +303,7 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 		    for( int i = 0; i < customHandlers.size(); ++i ) {
 			if( customHandlers[i]->canProcessInst(nextInstOp) ) {
 				instStatus = customHandlers[i]->execute( &output, nextInst,
-					regFile, ldStUnit, &pc, &instCyclesLeft );
+					regFile, ldStUnit, &pc );
 				break;
 			}
 		    }

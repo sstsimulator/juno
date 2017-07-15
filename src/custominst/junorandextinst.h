@@ -2,6 +2,7 @@
 #ifndef _H_SST_JUNO_RAND_UNIT
 #define _H_SST_JUNO_RAND_UNIT
 
+#include <sst/core/link.h>
 #include <sst/core/elementinfo.h>
 #include <sst/core/subcomponent.h>
 #include <sst/core/rng/mersenne.h>
@@ -18,11 +19,11 @@ namespace Juno {
 #define JUNO_RAND	200
 #define JUNO_RSEED	201
 
-class JunoRandInstructionHandler : public JunoCustomInstructionHandler {
+class JunoExternalRandInstructionHandler : public JunoCustomInstructionHandler {
 
 public:
-	JunoRandInstructionHandler( Component* owner, Params& params );
-	~JunoRandInstructionHandler();
+	JunoExternalRandInstructionHandler( Component* owner, Params& params );
+	~JunoExternalRandInstructionHandler();
 
 	// Return true if the op-code is either RAND or RSEED instructions
 	// that's all we can process in this unit
@@ -35,30 +36,27 @@ public:
                 JunoRegisterFile* regFile, JunoLoadStoreUnit* loadStoreUnit,
 		uint64_t* pc );
 	bool isBusy();
+	void handleGenerateResp(SST::Event* ev);
 
 	SST_ELI_REGISTER_SUBCOMPONENT(
-		JunoRandInstructionHandler,
+		JunoExternalRandInstructionHandler,
 		"juno",
-		"JunoRandomHandler",
+		"JunoExternalRandomHandler",
 		SST_ELI_ELEMENT_VERSION(1, 0, 0),
-		"Random number generation instruction handler for Juno",
+		"Random number generation instruction handler that connects to an external random number generator for Juno",
 		"SST::Juno::CustomInstructionHandler"
 		)
 
-	SST_ELI_DOCUMENT_PARAMS(
-        	{ "seed", "Set the seed value for the random instructions", "101010101" }
-    		)
-
-	SST_ELI_DOCUMENT_STATISTICS(
-		{ "calls-to-rand", "Number of times the RAND instruction is called", "calls", 1 },
-		{ "calls-to-rseed", "Number of times the RSEED instruction is called", "calls", 1 }
+	SST_ELI_DOCUMENT_PORTS(
+		{ "genlink", "Link to the Random number accelerator", { "juno.JunoGenerateRandEvent", "" } }
 		)
 
 private:
-	MersenneRNG* rng;
-	Statistic<uint64_t>* statRandCalls;
-	Statistic<uint64_t>* statRandSeedCalls;
-	uint64_t cyclesLeft;
+	int nextEvID;
+	uint8_t targetReg;
+	JunoRegisterFile* registers;
+	SST::Link* randAccLink;
+	SST::Output* cpuOut;
 
 };
 

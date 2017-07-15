@@ -16,10 +16,20 @@ JunoRandInstructionHandler::JunoRandInstructionHandler( Component* owner, Params
 
 	statRandCalls = registerStatistic<uint64_t>("calls-to-rand");
 	statRandSeedCalls = registerStatistic<uint64_t>("calls-to-rseed");
+
+	cyclesLeft = 0;
 }
 
 JunoRandInstructionHandler::~JunoRandInstructionHandler() {
 	delete rng;
+}
+
+bool JunoRandInstructionHandler::isBusy() {
+	if( cyclesLeft > 0 ) {
+		cyclesLeft--;
+	}
+
+	return (cyclesLeft > 0);
 }
 
 // Return true if the op-code is either RAND or RSEED instructions
@@ -50,21 +60,20 @@ void JunoRandInstructionHandler::executeRandSeed( SST::Output* output, const Jun
 }
 
 int JunoRandInstructionHandler::execute( SST::Output* output, JunoCPUInstruction* inst,
-        JunoRegisterFile* regFile, JunoLoadStoreUnit* loadStoreUnit, uint64_t* pc,
-	SST::Cycle_t* cycles ) {
+        JunoRegisterFile* regFile, JunoLoadStoreUnit* loadStoreUnit, uint64_t* pc ) {
 
 	switch( inst->getInstCode() ) {
 	case JUNO_RAND:
 		executeRand( output, inst, regFile );
 		// Tell the owning CPU how many cycles this takes
-		*cycles = 20;
+		cyclesLeft = 20;
 		statRandCalls->addData(1);
 		break;
 
 	case JUNO_RSEED:
 		executeRandSeed( output, inst, regFile );
 		// Tell the CPU how many cycles this instruction takes
-		(*cycles) = 10;
+		cyclesLeft = 10;
 		statRandSeedCalls->addData(1);
 		break;
 

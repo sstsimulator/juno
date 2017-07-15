@@ -20,8 +20,8 @@ public:
 	virtual bool canProcessInst( const uint8_t opCode ) = 0;
 	virtual int  execute( SST::Output* output, JunoCPUInstruction* inst,
 		JunoRegisterFile* regFile, JunoLoadStoreUnit* loadStoreUnit,
-		uint64_t* pc, SST::Cycle_t* cyclesTaken ) = 0;
-
+		uint64_t* pc ) = 0;
+	virtual bool isBusy() = 0;
 };
 
 }
