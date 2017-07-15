@@ -1,5 +1,7 @@
 #include <sst/core/sst_config.h>
 
+#include <limits>
+
 #include "junocpu.h"
 #include "junocpuinst.h"
 #include "junoinstmgr.h"
@@ -77,7 +79,8 @@ SST::Component(id) {
 
     output.verbose(CALL_INFO, 1, 0, "Creating load/store unit...\n");
 
-    ldStUnit = new JunoLoadStoreUnit( &output, mem, regFile );
+    uint64_t maxLoadStoreAddr = params.find<uint64_t>("max-address", std::numeric_limits<uint64_t>::max());
+    ldStUnit = new JunoLoadStoreUnit( &output, mem, regFile, maxLoadStoreAddr );
 
     output.verbose(CALL_INFO, 1, 0, "Loading custom instructions...\n");
 
@@ -181,6 +184,10 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
             output.verbose(CALL_INFO, 16, 0, "Memory operation pending, no instructions this cycle.\n");
         } else if( instMgr->instReady( pc ) ) {
             output.verbose(CALL_INFO, 2, 0, "Next Instruction, PC=%" PRId64 "...\n", pc);
+
+	    if( output.getVerboseLevel() >= 32 ) {
+		regFile->printRegisters();
+	    }
 
             JunoCPUInstruction* nextInst = instMgr->getInstruction( pc );
             const uint8_t nextInstOp = nextInst->getInstCode();

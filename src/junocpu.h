@@ -57,7 +57,8 @@ namespace SST {
                                     { "cycles-mod", "Cycles to spend on an MOD operation", "6"},
                                     { "cycles-and", "Cycles to spend on an AND operation", "1"},
                                     { "cycles-xor", "Cycles to spend on an XOR operation", "1"},
-                                    { "cycles-or",  "Cycles to spend on an OR operation", "1"}
+                                    { "cycles-or",  "Cycles to spend on an OR operation", "1"},
+				    { "max-address", "Set a maximum address that memory addresses are allowed to access (debugging mechanism)", "2147483647" }
                                     )
 
 	    SST_ELI_DOCUMENT_STATISTICS(

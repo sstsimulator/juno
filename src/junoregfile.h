@@ -20,12 +20,21 @@ public:
 	}
 
 	~JunoRegisterFile() {
-		for( int i = 0; i < maxReg; ++i ) {
+		printRegisters();
+		free(registers);
+	}
+
+	void printRegisters() {
+		output->verbose(CALL_INFO, 2, 0, "Register [r%06d]: [%" PRId64 "]\n",
+			0, *pc);
+
+		output->verbose(CALL_INFO, 2, 0, "Register [r%06d]: [%" PRId64 "]\n",
+			1, dynDataLoc);
+
+		for( int i = 2; i < maxReg; ++i ) {
 			output->verbose(CALL_INFO, 2, 0, "Register [r%06d]: [%" PRId64 "]\n",
 				i, registers[i]);
 		}
-
-		free(registers);
 	}
 
 	void clear() {

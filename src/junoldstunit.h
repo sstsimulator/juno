@@ -16,7 +16,7 @@ namespace SST {
             
         public:
             JunoLoadStoreEntry( const SimpleMem::Request::id_t reqID, uint8_t regTgt ) :
-            id(reqID), regTarget(regTgt) {}
+            	id(reqID), regTarget(regTgt) {}
             
             ~JunoLoadStoreEntry() {}
             
@@ -32,8 +32,8 @@ namespace SST {
         class JunoLoadStoreUnit {
             
         public:
-            JunoLoadStoreUnit( SST::Output* out, SimpleMem* smMem, JunoRegisterFile* rFile ) :
-            output(out), mem(smMem), regFile(rFile) {}
+            JunoLoadStoreUnit( SST::Output* out, SimpleMem* smMem, JunoRegisterFile* rFile, const uint64_t maxAddress ) :
+            output(out), mem(smMem), regFile(rFile), maxAddr(maxAddress) {}
             
             bool operationsPending() {
                 return pending.size() > 0;
@@ -42,6 +42,11 @@ namespace SST {
             void createLoadRequest( uint64_t addr, uint8_t reg ) {
                 output->verbose(CALL_INFO, 16, 0, "Creating a load from address: %" PRIu64 " into register: %" PRIu8 "\n",
                                 addr, reg);
+
+		if( addr >= maxAddr ) {
+			output->fatal(CALL_INFO, -1, "Address requested: %" PRIu64 " but maximum address is: %" PRIu64 "\n",
+				addr, maxAddr);
+		}
                 
                 SimpleMem::Request* req = new SimpleMem::Request(SimpleMem::Request::Read, addr, 8);
                 
@@ -54,6 +59,11 @@ namespace SST {
             void createStoreRequest( uint64_t addr, uint8_t reg ) {
                 output->verbose(CALL_INFO, 16, 0, "Creating a store from register %" PRIu8 " to address: %" PRIu64 "...\n",
                                 reg, addr);
+
+		if( addr >= maxAddr ) {
+			output->fatal(CALL_INFO, -1, "Address requested: %" PRIu64 " but maximum address is: %" PRIu64 "\n",
+				addr, maxAddr);
+		}
                 
                 SimpleMem::Request* req = new SimpleMem::Request(SimpleMem::Request::Write, addr, 8);
                 
@@ -98,7 +108,7 @@ namespace SST {
             SimpleMem* mem;
             JunoRegisterFile* regFile;
             std::map<SimpleMem::Request::id_t, JunoLoadStoreEntry*> pending;
-            
+            uint64_t maxAddr;
         };
         
     }
