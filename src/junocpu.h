@@ -72,6 +72,11 @@ namespace SST {
                                    { "cache_link", "Connects the CPU to the cache", {} }
                                    )
 
+	    SST_ELI_DOCUMENT_SUBCOMPONENT_SLOTS(
+        		{"customhandler", "Holds customer instruction handlers",
+				"SST::Juno::CustomInstructionHandler" }
+    		)
+
         private:
             JunoProgramReader* progReader;
             JunoRegisterFile* regFile;
