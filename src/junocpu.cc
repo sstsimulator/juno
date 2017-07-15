@@ -15,11 +15,7 @@ using namespace SST::Juno;
 
 JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 SST::Component(id) {
-    
-    cyclesExecuted = 0;
-    
-    int verbosity = params.find<int>("verbose");
-    
+    const int verbosity = params.find<int>("verbose", 0);
     output.init("Juno[" + getName() + ":@p:@t]: ", verbosity, 0, SST::Output::STDOUT);
     
     std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.memInterface");
@@ -74,17 +70,34 @@ SST::Component(id) {
     pc = progReader->getDataLength();
     
     output.verbose(CALL_INFO, 1, 0, "PC set to: %" PRIu64 "\n", pc);
-    
+
     int maxReg = params.find<int>("registers", "8");
     output.verbose(CALL_INFO, 1, 0, "Creating a register file of %d 64-bit integer registers...\n", maxReg);
     regFile = new JunoRegisterFile(&output, maxReg, &pc, progReader->getDataLength() + progReader->getInstLength() );
-    
+
     output.verbose(CALL_INFO, 1, 0, "Creating load/store unit...\n");
-    
+
     ldStUnit = new JunoLoadStoreUnit( &output, mem, regFile );
-    
+
+    output.verbose(CALL_INFO, 1, 0, "Loading custom instructions...\n");
+
+    SubComponentSlotInfo* handlerSlot = getSubComponentSlotInfo("customhandler");
+    std::vector<SubComponent*> subComps;
+
+    if( NULL != handlerSlot ) {
+	handlerSlot->createAll( subComps );
+
+	for( int i = 0; i < subComps.size(); ++i ) {
+		JunoCustomInstructionHandler* nextHandler = dynamic_cast<JunoCustomInstructionHandler*>( subComps[i] );
+
+		if( NULL != nextHandler ) {
+			customHandlers.push_back(nextHandler);
+		}
+	}
+    }
+
     output.verbose(CALL_INFO, 1, 0, "Loading operation cycle counts...\n");
-    
+
     addCycles = params.find<SST::Cycle_t>("cycles-add", 1);
     subCycles = params.find<SST::Cycle_t>("cycles-sub", 1);
     mulCycles = params.find<SST::Cycle_t>("cycles-mul", 1);
@@ -93,6 +106,8 @@ SST::Component(id) {
     andCycles = params.find<SST::Cycle_t>("cycles-and", 1);
     xorCycles = params.find<SST::Cycle_t>("cycles-xor", 1);
     orCycles  = params.find<SST::Cycle_t>("cycles-or", 1);
+
+    output.verbose(CALL_INFO, 1, 0, "Configuring statistics...\n");
 
     statCycles       = registerStatistic<uint64_t>( "cycles" );
     statInstructions = registerStatistic<uint64_t>( "instructions" );
@@ -149,11 +164,9 @@ void JunoCPU::init( unsigned int phase ) {
 }
 
 void JunoCPU::setup() {
-    output.verbose(CALL_INFO, 1, 0, "Component is being setup.\n");
 }
 
 void JunoCPU::finish() {
-    output.verbose(CALL_INFO, 1, 0, "Component is being finished (executed: %" PRId64 " cycles)\n", cyclesExecuted);
 }
 
 bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
@@ -266,8 +279,21 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
                     return true;
 
                 default:
-                    fprintf(stderr, "ERROR: Unknown instruction encountered.\n");
-                    exit(-1);
+		    int instStatus = 1;
+
+		    for( int i = 0; i < customHandlers.size(); ++i ) {
+			if( customHandlers[i]->canProcessInst(nextInstOp) ) {
+				instStatus = customHandlers[i]->execute( &output, nextInst,
+					regFile, ldStUnit, &pc, &instCyclesLeft );
+				break;
+			}
+		    }
+
+		    if( instStatus != 0 ) {
+                    	fprintf(stderr, "ERROR: Unknown instruction encountered (return code %d)\n", instStatus);
+                    	exit(-1);
+		    }
+
                     break;
             }
         }

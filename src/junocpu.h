@@ -13,6 +13,8 @@
 #include "junoinstmgr.h"
 #include "junocpuinst.h"
 
+#include "custominst/junocustinst.h"
+
 using namespace SST::Interfaces;
 using namespace SST::Juno;
 
@@ -52,6 +54,7 @@ namespace SST {
                                     { "cycles-sub", "Cycles to spend on an SUB operation", "1"},
                                     { "cycles-mul", "Cycles to spend on an MUL operation", "2"},
                                     { "cycles-div", "Cycles to spend on an DIV operation", "6"},
+                                    { "cycles-mod", "Cycles to spend on an MOD operation", "6"},
                                     { "cycles-and", "Cycles to spend on an AND operation", "1"},
                                     { "cycles-xor", "Cycles to spend on an XOR operation", "1"},
                                     { "cycles-or",  "Cycles to spend on an OR operation", "1"}
@@ -67,20 +70,18 @@ namespace SST {
             SST_ELI_DOCUMENT_PORTS(
                                    { "cache_link", "Connects the CPU to the cache", {} }
                                    )
-            
+
         private:
             JunoProgramReader* progReader;
             JunoRegisterFile* regFile;
             JunoInstructionMgr* instMgr;
             JunoLoadStoreUnit* ldStUnit;
             uint64_t pc;
-            
-            uint64_t cyclesExecuted;
-            
+
             SimpleMem* mem;
-            
+
             SST::Cycle_t instCyclesLeft;
-            
+
             SST::Cycle_t addCycles;
             SST::Cycle_t subCycles;
             SST::Cycle_t divCycles;
@@ -88,6 +89,7 @@ namespace SST {
             SST::Cycle_t andCycles;
             SST::Cycle_t orCycles;
             SST::Cycle_t xorCycles;
+	    SST::Cycle_t modCycles;
 
             SST::Output output;
 
@@ -95,6 +97,8 @@ namespace SST {
 	    Statistic<uint64_t>* statInstructions;
             Statistic<uint64_t>* statMemReads;
             Statistic<uint64_t>* statMemWrites;
+
+	    std::vector<JunoCustomInstructionHandler*> customHandlers;
         };
 
     }
