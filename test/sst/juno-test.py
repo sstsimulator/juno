@@ -12,7 +12,7 @@ comp_cpu = sst.Component("cpu", "juno.JunoCPU")
 comp_cpu.addParams({
 	"verbose" : 4,
 	"registers" : 16,
-	"program" : "../test/asm/randtest.bin",
+	"program" : "../asm/gups.bin",
 	"clock" : "2.4GHz",
 	"cycles-add" : 1
 })
@@ -32,7 +32,7 @@ comp_l1cache.addParams({
       "prefetcher" : "cassini.StridePrefetcher",
       "debug" : "1",
       "L1" : "1",
-      "cache_size" : "32KB"
+      "cache_size" : "2MB"
 })
 
 comp_memory = sst.Component("memory", "memHierarchy.MemController")
