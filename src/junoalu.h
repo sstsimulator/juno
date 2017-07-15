@@ -68,7 +68,7 @@ namespace SST {
             
             const int64_t result    = valLeft % valRight;
             
-            output.verbose(CALL_INFO, 4, 0, "MOD[r%3" PRIu8 ", r%3" PRIu8 ", res=r%3" PRIu8 "]: (%" PRId64 " \% %" PRId64 " = %" PRId64 ")\n",
+            output.verbose(CALL_INFO, 4, 0, "MOD[r%3" PRIu8 ", r%3" PRIu8 ", res=r%3" PRIu8 "]: (%" PRId64 " mod %" PRId64 " = %" PRId64 ")\n",
                            opLeft, opRight, resultReg, valLeft, valRight, result);
             
             regFile->writeReg( resultReg, result );
