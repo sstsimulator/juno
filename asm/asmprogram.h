@@ -278,6 +278,8 @@ public:
 		const uint64_t regOne64 = static_cast<uint64_t>(regOne);
 		const uint64_t regTwo64 = static_cast<uint64_t>(regTwo);
 
+		printf("Creating a LOAD reg1=r%" PRIu8 ", regTarget=r%" PRIu8 "\n", regOne, regTwo);
+
 		uint32_t finalInst = static_cast<uint32_t>(junoCode) + (regTwo64 << 24) + (regOne64 << 8);
                 memcpy( (void*) &binaryOp[0], (void*) &finalInst, sizeof(finalInst) );
 	}
