@@ -11,9 +11,9 @@ using namespace SST::RNG;
 using namespace SST::Juno;
 
 JunoExternalRandInstructionHandler::JunoExternalRandInstructionHandler( Component* owner, Params& params ) :
-		JunoCustomInstructionHandler( owner, params ), nextEvID(0) {
+		JunoCustomInstructionHandler( owner, params ), nextEvID(0), targetReg(0) {
 
-	randAccLink = configureLink( "genlink", new Event::Handler<JunoExternalRandInstructionHandler>(
+	randAccLink = configureLink( "genlink", "1ns", new Event::Handler<JunoExternalRandInstructionHandler>(
 		this, &JunoExternalRandInstructionHandler::handleGenerateResp));
 }
 
@@ -22,6 +22,10 @@ JunoExternalRandInstructionHandler::~JunoExternalRandInstructionHandler() {
 }
 
 bool JunoExternalRandInstructionHandler::isBusy() {
+	// is the unit still processing old instructions?
+	// we detect this by seeing if we are targetting register zero
+	// since this is where the PC is located, if its zero
+	// we are not currently processing anything
 	return (targetReg > 0);
 }
 
@@ -42,6 +46,15 @@ void JunoExternalRandInstructionHandler::handleGenerateResp(SST::Event* ev) {
 
 	cpuOut->verbose(CALL_INFO, 2, 0, "Generated random value is: %" PRId64 "\n", resp->getRand());
 	registers->writeReg( targetReg, resp->getRand() );
+
+	// Reset the target register back to zero, this is our
+	// book keeping, if register is zero we are not currently
+	// processing any instructions
+	cpuOut->verbose(CALL_INFO, 2, 0, "Reseting register back to zero, free CPU to process instructions.\n");
+	targetReg = 0;
+
+	// Delete the response now
+	delete ev;
 }
 
 void JunoExternalRandInstructionHandler::executeRand( SST::Output* output, const JunoCPUInstruction* inst,
@@ -53,8 +66,15 @@ void JunoExternalRandInstructionHandler::executeRand( SST::Output* output, const
 	registers = regFile;
 	cpuOut = output;
 
+	output->verbose(CALL_INFO, 2, 0, "Sending request to an external random number generator...\n");
+
+	// Send a request to the accelerator to do some processing on our behalf
+	// this really generates a random number and sends it back to us
+	// to be written into the register file
 	JunoGenerateRandEvent* genRand = new JunoGenerateRandEvent(nextEvID++);
 	randAccLink->send(genRand);
+
+	output->verbose(CALL_INFO, 2, 0, "Send to external generator complete.\n");
 }
 
 void JunoExternalRandInstructionHandler::executeRandSeed( SST::Output* output, const JunoCPUInstruction* inst,
