@@ -1,0 +1,43 @@
+LDA $10000 r2
+LDA $8 r3
+LDA $1 r4
+XOR r5 r5 r5
+XOR r7 r7 r7
+XOR r8 r8 r8
+XOR r9 r9 r9
+ADD r1 r7 r7
+MUL r2 r3 r8
+ADD r1 r8 r8
+MUL r2 r3 r9
+ADD r8 r9 r9
+INITLOOP:
+ADD r4 r5 r5
+STORE r5 r7
+STORE r5 r8
+STORE r5 r9
+ADD r3 r7 r7
+ADD r3 r8 r8
+ADD r3 r9 r9
+SUB r2 r5 r6
+JGTZ r6 INITLOOP
+XOR r5 r5 r5
+XOR r7 r7 r7 
+XOR r8 r8 r8
+XOR r9 r9 r9
+ADD r1 r7 r7
+MUL r2 r3 r8
+ADD r1 r8 r8
+MUL r2 r3 r9
+ADD r8 r9 r9
+STREAMLOOP:
+LOAD r7 r10
+LOAD r8 r11
+ADD r10 r11 r13
+STORE r13 r9
+ADD r3 r7 r7
+ADD r3 r8 r8
+ADD r3 r9 r9
+ADD r4 r5 r5
+SUB r2 r5 r6
+JGTZ r6 STREAMLOOP
+HALT
