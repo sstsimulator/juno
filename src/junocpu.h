@@ -82,6 +82,7 @@ namespace SST {
             JunoRegisterFile* regFile;
             JunoInstructionMgr* instMgr;
             JunoLoadStoreUnit* ldStUnit;
+	    int handlerCount;
             uint64_t pc;
 
             SimpleMem* mem;

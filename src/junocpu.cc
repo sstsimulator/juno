@@ -86,6 +86,7 @@ SST::Component(id) {
 
     SubComponentSlotInfo* handlerSlot = getSubComponentSlotInfo("customhandler");
     std::vector<SubComponent*> subComps;
+    handlerCount = 0;
 
     if( NULL != handlerSlot ) {
 	handlerSlot->createAll( subComps );
@@ -99,8 +100,8 @@ SST::Component(id) {
 	}
     }
 
-    output.verbose(CALL_INFO, 1, 0, "Loaded %d custom instruction handlers.\n",
-	static_cast<int>(subComps.size()));
+    handlerCount = static_cast<int>(subComps.size());
+    output.verbose(CALL_INFO, 1, 0, "Loaded %d custom instruction handlers.\n", handlerCount);
     output.verbose(CALL_INFO, 1, 0, "Loading operation cycle counts...\n");
 
     addCycles = params.find<SST::Cycle_t>("cycles-add", 1);
@@ -180,11 +181,14 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 2, 0, "Cycle: %" PRIu64 "\n", static_cast<uint64_t>(currentCycle));
 
     bool handlersClear = true;
-    for( int i = 0; i < customHandlers.size(); ++i ) {
-	if( customHandlers[i]->isBusy() ) {
-		handlersClear = false;
-		break;
-	}
+
+    if( handlerCount > 0 ) {
+	    for( int i = 0; i < handlerCount; ++i ) {
+		if( customHandlers[i]->isBusy() ) {
+			handlersClear = false;
+			break;
+		}
+    	}
     }
 
     if( 0 == instCyclesLeft ) {
