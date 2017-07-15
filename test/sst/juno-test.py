@@ -12,13 +12,14 @@ comp_cpu = sst.Component("cpu", "juno.JunoCPU")
 comp_cpu.addParams({
 	"verbose" : 4,
 	"registers" : 16,
-	"program" : "../test/asm/modulo.bin",
+	"program" : "../test/asm/randtest.bin",
 	"clock" : "2.4GHz",
 	"cycles-add" : 1
 })
 
-# Enable statistics outputs
-comp_cpu.enableAllStatistics({"type":"sst.AccumulatorStatistic"})
+# Define RAND support
+randsc = comp_cpu.setSubComponent("customhandler", "juno.JunoRandomHandler")
+randsc.addParam("seed", 131313)
 
 comp_l1cache = sst.Component("l1cache", "memHierarchy.Cache")
 comp_l1cache.addParams({
@@ -34,9 +35,6 @@ comp_l1cache.addParams({
       "cache_size" : "32KB"
 })
 
-# Enable statistics outputs
-comp_l1cache.enableAllStatistics({"type":"sst.AccumulatorStatistic"})
-
 comp_memory = sst.Component("memory", "memHierarchy.MemController")
 comp_memory.addParams({
       "coherence_protocol" : "MESI",
@@ -44,6 +42,13 @@ comp_memory.addParams({
       "backend.mem_size" : "16GiB",
       "clock" : "1GHz"
 })
+
+sst.setStatisticOutput("sst.statOutputCSV")
+sst.enableAllStatisticsForAllComponents()
+
+sst.setStatisticOutputOptions( {
+        "filepath"  : "output.csv"
+} )
 
 # Define the simulation links
 link_cpu_cache_link = sst.Link("link_cpu_cache_link")
