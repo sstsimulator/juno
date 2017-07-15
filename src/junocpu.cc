@@ -96,6 +96,8 @@ SST::Component(id) {
 	}
     }
 
+    output.verbose(CALL_INFO, 1, 0, "Loaded %d custom instruction handlers.\n",
+	static_cast<int>(subComps.size()));
     output.verbose(CALL_INFO, 1, 0, "Loading operation cycle counts...\n");
 
     addCycles = params.find<SST::Cycle_t>("cycles-add", 1);
