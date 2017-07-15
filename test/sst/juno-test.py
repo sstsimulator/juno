@@ -1,3 +1,4 @@
+import os
 import sst
 
 # Define SST core options
@@ -10,11 +11,12 @@ sst.setStatisticLoadLevel(4)
 # Define the simulation components
 comp_cpu = sst.Component("cpu", "juno.JunoCPU")
 comp_cpu.addParams({
-	"verbose" : 4,
+	"verbose" : 16,
 	"registers" : 16,
-	"program" : "../asm/gups.bin",
+	"program" : os.getenv("JUNO_EXE", "../asm/gups.bin"),
 	"clock" : "2.4GHz",
-	"cycles-add" : 1
+	"cycles-add" : 1,
+	"max-address" : 16 * 1024 * 1024 * 1024
 })
 
 # Define RAND support
@@ -32,7 +34,7 @@ comp_l1cache.addParams({
       "prefetcher" : "cassini.StridePrefetcher",
       "debug" : "1",
       "L1" : "1",
-      "cache_size" : "2MB"
+      "cache_size" : "512B"
 })
 
 comp_memory = sst.Component("memory", "memHierarchy.MemController")
