@@ -210,11 +210,6 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 	    statInstructions->addData(1);
 
             switch( nextInstOp ) {
-                case JUNO_NOOP :
-                    pc += 4;
-                    instCyclesLeft = 1;
-                    break;
-
                 case JUNO_LOAD :
                     executeLoad( output, nextInst, regFile, ldStUnit );
 		    statMemReads->addData(1);
@@ -251,18 +246,6 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
                     instCyclesLeft = mulCycles;
                     break;
 
-                case JUNO_DIV :
-                    executeDiv( output, nextInst, regFile );
-                    pc += 4;
-                    instCyclesLeft = divCycles;
-                    break;
-
-                case JUNO_MOD :
-                    executeMod( output, nextInst, regFile );
-                    pc += 4;
-                    instCyclesLeft = modCycles;
-                    break;
-
                 case JUNO_AND :
                     executeAnd( output, nextInst, regFile );
                     pc += 4;
@@ -295,6 +278,23 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 
                 case JUNO_PCR_JUMP_GTZ:
                     executeJumpGTZ( output, nextInst, regFile, &pc );
+                    break;
+
+                case JUNO_MOD :
+                    executeMod( output, nextInst, regFile );
+                    pc += 4;
+                    instCyclesLeft = modCycles;
+                    break;
+
+                case JUNO_DIV :
+                    executeDiv( output, nextInst, regFile );
+                    pc += 4;
+                    instCyclesLeft = divCycles;
+                    break;
+
+                case JUNO_NOOP :
+                    pc += 4;
+                    instCyclesLeft = 1;
                     break;
 
                 case JUNO_HALT :
