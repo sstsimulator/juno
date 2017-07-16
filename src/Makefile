@@ -1,7 +1,7 @@
 CXX=$(shell sst-config --CXX)
 CXXFLAGS=$(shell sst-config --ELEMENT_CXXFLAGS)
 LDFLAGS=$(shell sst-config --ELEMENT_LDFLAGS)
-CPPFLAGS=-I./ -I./assembly
+CPPFLAGS=-I./
 OPTIMIZE_FLAGS=-O3
 
 JUNO_SOURCES := $(wildcard *.cc)
@@ -31,4 +31,4 @@ install:
 	sst-register juno LIBDIR=$(CURDIR)
 
 clean:
-	rm -f *.o assembly/*.o instmgr/*.o custominst/*.o libjuno.so
+	rm -f *.o instmgr/*.o custominst/*.o libjuno.so
