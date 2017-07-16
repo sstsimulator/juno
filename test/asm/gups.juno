@@ -1,6 +1,7 @@
-LDA $16384 r2
+LDA $131072 r2
 LDA $1 r3
 LDA $8 r4
+LDA $7 r14
 # Clear Registers
 XOR r5 r5 r5
 XOR r6 r6 r6
@@ -25,6 +26,8 @@ XOR r9 r9 r9
 SUB r9 r8 r8
 SKIPZERO:
 MOD r8 r2 r9
+AND r9 r14 r13
+SUB r9 r13 r9
 STORE r9 r6
 STORE r9 r7
 SUB r2 r5 r15
@@ -42,7 +45,7 @@ XOR r8 r8 r8
 XOR r9 r9 r9
 LOAD r7 r8
 LOAD r8 r9
-#XOR r9 r3 r9
+XOR r9 r3 r9
 STORE r9 r8
 ADD r3 r5 r5
 ADD r4 r7 r7
