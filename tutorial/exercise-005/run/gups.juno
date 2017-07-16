@@ -1,0 +1,51 @@
+LDA $2048 r2
+LDA $1 r3
+LDA $8 r4
+# Clear Registers
+XOR r5 r5 r5
+XOR r6 r6 r6
+XOR r7 r7 r7
+# Setup pointers to arrays for GUPS
+MUL r4 r2 r6
+ADD r1 r6 r6
+ADD r1 r7 r7
+# -------------------------------------------------------
+# Initialize the arrays used by GUPS in a loop
+# r5 is the counter register, ++r5 on each iteration
+# r6 is address of valyes
+# r7 is address of indices
+# -------------------------------------------------------
+INITLOOP:
+ADD r3 r5 r5
+ADD r4 r6 r6
+ADD r4 r7 r7
+RAND r8
+JGTZ r8 SKIPZERO
+XOR r9 r9 r9
+SUB r9 r8 r8
+SKIPZERO:
+MOD r8 r2 r9
+STORE r9 r6
+STORE r9 r7
+SUB r2 r5 r15
+JGTZ r15 INITLOOP
+# -------------------------------------------------------
+EXITINIT:
+XOR r5 r5 r5
+XOR r6 r6 r6
+XOR r7 r7 r7
+MUL r4 r2 r6
+ADD r1 r6 r6
+ADD r1 r7 r7
+GUPSLOOP:
+XOR r8 r8 r8
+XOR r9 r9 r9
+LOAD r7 r8
+LOAD r8 r9
+#XOR r9 r3 r9
+STORE r9 r8
+ADD r3 r5 r5
+ADD r4 r7 r7
+SUB r2 r5 r8
+JGTZ r8 GUPSLOOP
+HALT
