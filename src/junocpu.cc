@@ -131,40 +131,40 @@ JunoCPU::~JunoCPU() {
 
 void JunoCPU::handleEvent( SimpleMem::Request* ev ) {
     output.verbose(CALL_INFO, 4, 0, "Recv response from cache\n");
-    
+
     if( ev->cmd == Interfaces::SimpleMem::Request::Command::ReadResp ) {
         // Read request needs some special handling
         uint8_t regTarget = ldStUnit->lookupEntry( ev->id );
         int64_t newValue = 0;
-        
+
         memcpy( (void*) &newValue, &ev->data[0], sizeof(newValue) );
-        
         output.verbose(CALL_INFO, 8, 0, "Response to a read, payload=%" PRId64 ", for reg: %" PRIu8 "\n", newValue, regTarget);
-        
         regFile->writeReg(regTarget, newValue);
     }
-    
+
     ldStUnit->removeEntry( ev->id );
-    
+
+    // Need to clean up the events coming back from the cache
+    delete ev;
     output.verbose(CALL_INFO, 4, 0, "Complete cache response handling.\n");
 }
 
 void JunoCPU::init( unsigned int phase ) {
     if( 0 == phase ) {
         const int initLen = progReader->getDataLength() + progReader->getInstLength();
-        
+
         std::vector<uint8_t> exeImage;
         exeImage.reserve( initLen );
-        
+
         for( int i = 0; i < initLen; ++i ) {
             exeImage.push_back( progReader->getBinaryBuffer()[i] );
         }
-        
+
         SimpleMem::Request* writeExe = new SimpleMem::Request(SimpleMem::Request::Write, 0, exeImage.size(), exeImage);
         output.verbose(CALL_INFO, 1, 0, "Sending initialization data to memory...\n");
-        
+
         mem->sendInitData(writeExe);
-        
+
         output.verbose(CALL_INFO, 1, 0, "Initialization data sent.\n");
     }
 }
@@ -319,6 +319,8 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 
                     break;
             }
+
+	    delete nextInst;
         }
     } else {
         output.verbose(CALL_INFO, 4, 0, "CPU still busy (%" PRIu64 " cycles to go.\n", static_cast<uint64_t>(instCyclesLeft));
