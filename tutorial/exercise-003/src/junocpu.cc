@@ -113,6 +113,13 @@ SST::Component(id) {
     xorCycles = params.find<SST::Cycle_t>("cycles-xor", 1);
     orCycles  = params.find<SST::Cycle_t>("cycles-or", 1);
 
+    output.verbose(CALL_INFO, 1, 0, "Configuring statistics...\n");
+
+    statCycles       = registerStatistic<uint64_t>( "cycles" );
+    statInstructions = registerStatistic<uint64_t>( "instructions" );
+    statMemReads     = registerStatistic<uint64_t>( "mem-reads" );
+    statMemWrites    = registerStatistic<uint64_t>( "mem-writes" );
+
     output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
 
@@ -170,6 +177,7 @@ void JunoCPU::finish() {
 
 bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 
+    statCycles->addData(1);
     output.verbose(CALL_INFO, 2, 0, "Cycle: %" PRIu64 "\n", static_cast<uint64_t>(currentCycle));
 
     bool handlersClear = true;
@@ -199,20 +207,24 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
             const uint8_t nextInstOp = nextInst->getInstCode();
 
             output.verbose(CALL_INFO, 4, 0, "Operation code: %" PRIu8 "\n", nextInstOp);
+	    statInstructions->addData(1);
 
             switch( nextInstOp ) {
                 case JUNO_LOAD :
                     executeLoad( output, nextInst, regFile, ldStUnit );
+		    statMemReads->addData(1);
                     pc += 4;
                     break;
 
                 case JUNO_LOAD_ADDR:
                     executeLDA( output, nextInst, regFile, ldStUnit );
+		    statMemReads->addData(1);
                     pc += 4;
                     break;
 
                 case JUNO_STORE :
                     executeStore( output, nextInst, regFile, ldStUnit );
+		    statMemWrites->addData(1);
                     pc += 4;
                     break;
 

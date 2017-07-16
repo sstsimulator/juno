@@ -5,10 +5,14 @@ import sst
 sst.setProgramOption("timebase", "1ps")
 sst.setProgramOption("stopAtCycle", "0s")
 
+# Tell SST what statistics handling we want
+sst.setStatisticLoadLevel(4)
+
 # Define the simulation components
 comp_cpu = sst.Component("cpu", "juno.JunoCPU")
 comp_cpu.addParams({
 	"verbose" : 0,
+	"clock" : "2.4GHz",
 	"registers" : 16,
 	"program" : os.getenv("JUNO_EXE", "./sum.bin"),
 })
@@ -42,3 +46,11 @@ link_cpu_cache_link.setNoCut()
 
 link_mem_bus_link = sst.Link("link_mem_bus_link")
 link_mem_bus_link.connect( (comp_l1cache, "low_network_0", "50ps"), (comp_memory, "direct_link", "50ps") )
+
+# Set the statistics to output
+sst.setStatisticOutput("sst.statOutputCSV")
+sst.enableAllStatisticsForAllComponents()
+
+sst.setStatisticOutputOptions( {
+        "filepath"  : "output.csv"
+} )

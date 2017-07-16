@@ -5,9 +5,6 @@ import sst
 sst.setProgramOption("timebase", "1ps")
 sst.setProgramOption("stopAtCycle", "0s")
 
-# Tell SST what statistics handling we want
-sst.setStatisticLoadLevel(4)
-
 # Define the simulation components
 comp_cpu = sst.Component("cpu", "juno.JunoCPU")
 comp_cpu.addParams({
