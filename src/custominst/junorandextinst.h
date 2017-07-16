@@ -51,12 +51,19 @@ public:
 		{ "genlink", "Link to the Random number accelerator", { "juno.JunoGenerateRandEvent", "" } }
 		)
 
+	SST_ELI_DOCUMENT_STATISTICS(
+		{ "rand-calls", "Calls to the RAND instruction", "calls", 1 },
+		{ "cycles-busy", "Cycles spent waiting for accelerator", "cycles", 1 }
+		)
+
 private:
 	int nextEvID;
 	uint8_t targetReg;
 	JunoRegisterFile* registers;
 	SST::Link* randAccLink;
 	SST::Output* cpuOut;
+	Statistic<uint64_t>* statRandCalls;
+	Statistic<uint64_t>* statCyclesBusy;
 
 };
 

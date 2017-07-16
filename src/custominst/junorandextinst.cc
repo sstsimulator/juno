@@ -15,6 +15,9 @@ JunoExternalRandInstructionHandler::JunoExternalRandInstructionHandler( Componen
 
 	randAccLink = configureLink( "genlink", "1ns", new Event::Handler<JunoExternalRandInstructionHandler>(
 		this, &JunoExternalRandInstructionHandler::handleGenerateResp));
+
+	statRandCalls = registerStatistic<uint64_t>("rand-calls");
+	statCyclesBusy = registerStatistic<uint64_t>("cycles-busy");
 }
 
 JunoExternalRandInstructionHandler::~JunoExternalRandInstructionHandler() {
@@ -22,6 +25,9 @@ JunoExternalRandInstructionHandler::~JunoExternalRandInstructionHandler() {
 }
 
 bool JunoExternalRandInstructionHandler::isBusy() {
+	// Keep track of how many cycles we are busy
+	statCyclesBusy->addData(1);
+
 	// is the unit still processing old instructions?
 	// we detect this by seeing if we are targetting register zero
 	// since this is where the PC is located, if its zero
@@ -52,6 +58,9 @@ void JunoExternalRandInstructionHandler::handleGenerateResp(SST::Event* ev) {
 	// processing any instructions
 	cpuOut->verbose(CALL_INFO, 2, 0, "Reseting register back to zero, free CPU to process instructions.\n");
 	targetReg = 0;
+
+	// Keep a count of how many calls we make
+	statRandCalls->addData(1);
 
 	// Delete the response now
 	delete ev;
