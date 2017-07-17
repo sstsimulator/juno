@@ -1,0 +1,5 @@
+*.bin
+*.o
+*.so
+output.csv
+sst-juno-asm
