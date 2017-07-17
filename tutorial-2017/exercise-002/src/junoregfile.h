@@ -10,7 +10,9 @@ namespace Juno {
 class JunoRegisterFile {
 
 public:
-	JunoRegisterFile( SST::Output* out, const int regCount, uint64_t* pcIn, const uint64_t dynDataStart ) :
+	JunoRegisterFile( SST::Output* out, const int regCount, uint64_t* pcIn,
+		const uint64_t dynDataStart ) :
+
 		pc(pcIn), output(out), maxReg(regCount), dynDataLoc(dynDataStart) {
 
 		output->verbose(CALL_INFO, 2, 0, "Creating %d registers...\n", regCount);

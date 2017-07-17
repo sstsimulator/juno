@@ -66,7 +66,7 @@ SST::Component(id) {
     fclose(progFileHandle);
     
     output.verbose(CALL_INFO, 1, 0, "Creating an instruction manager...\n");
-    instMgr = new JunoFixedPrgInstMgr( progReader->getBinaryBuffer(), (progReader->getDataLength() + progReader->getInstLength()) );
+    instMgr = new JunoFixedPrgInstMgr( progReader->getBinaryBuffer(), (progReader->getDataLength() + progReader->getInstLength() + progReader->getPadding() ) );
     
     instCyclesLeft = 0;
     pc = progReader->getDataLength();
@@ -152,6 +152,10 @@ void JunoCPU::init( unsigned int phase ) {
         for( int i = 0; i < initLen; ++i ) {
             exeImage.push_back( progReader->getBinaryBuffer()[i] );
         }
+
+	for( int i = 0; i < progReader->getPadding(); ++i ) {
+ 	    exeImage.push_back( static_cast<uint8_t>(0) );
+ 	}
 
         SimpleMem::Request* writeExe = new SimpleMem::Request(SimpleMem::Request::Write, 0, exeImage.size(), exeImage);
         output.verbose(CALL_INFO, 1, 0, "Sending initialization data to memory...\n");
