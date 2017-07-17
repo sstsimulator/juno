@@ -75,7 +75,8 @@ SST::Component(id) {
 
     int maxReg = params.find<int>("registers", "8");
     output.verbose(CALL_INFO, 1, 0, "Creating a register file of %d 64-bit integer registers...\n", maxReg);
-    regFile = new JunoRegisterFile(&output, maxReg, &pc, progReader->getDataLength() + progReader->getInstLength() );
+    regFile = new JunoRegisterFile(&output, maxReg, &pc, progReader->getDataLength() +
+	progReader->getInstLength() + progReader->getPadding() );
 
     output.verbose(CALL_INFO, 1, 0, "Creating load/store unit...\n");
 
@@ -159,6 +160,10 @@ void JunoCPU::init( unsigned int phase ) {
         for( int i = 0; i < initLen; ++i ) {
             exeImage.push_back( progReader->getBinaryBuffer()[i] );
         }
+
+	for( int i = 0; i < progReader->getPadding(); ++i ) {
+	    exeImage.push_back( static_cast<uint8_t>(0) );
+	}
 
         SimpleMem::Request* writeExe = new SimpleMem::Request(SimpleMem::Request::Write, 0, exeImage.size(), exeImage);
         output.verbose(CALL_INFO, 1, 0, "Sending initialization data to memory...\n");
