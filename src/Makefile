@@ -28,7 +28,7 @@ libjuno.so: $(JUNO_OBJS) $(ASM_OBJS) $(INSTMGR_OBJS) $(CUSTOMINST_OBJS) $(RANDAC
 	$(CXX) $(OPTIMIZE_FLAGS) $(CXXFLAGS) $(CPPFLAGS) -c $<
 
 install:
-	sst-register juno LIBDIR=$(CURDIR)
+	sst-register juno juno_LIBDIR=$(CURDIR)
 
 clean:
 	rm -f *.o instmgr/*.o custominst/*.o libjuno.so
