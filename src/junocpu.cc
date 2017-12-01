@@ -24,7 +24,7 @@ SST::Component(id) {
     output.verbose(CALL_INFO, 1, 0, "Loading memory interface: %s ...\n", memIFace.c_str());
     
     Params interfaceParams = params.find_prefix_params("meminterface.");
-    mem = dynamic_cast<SimpleMem*>( loadModuleWithComponent(memIFace, this, interfaceParams) );
+    mem = dynamic_cast<SimpleMem*>( loadSubComponent(memIFace, this, interfaceParams) );
     
     if( NULL == mem ) {
         output.fatal(CALL_INFO, -1, "Error: unable to load %s memory interface.\n", memIFace.c_str());
