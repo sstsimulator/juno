@@ -70,9 +70,9 @@ public:
 
 protected:
 	uint64_t* pc;
-	uint64_t dynDataLoc;
 	SST::Output* output;
 	const int maxReg;
+	uint64_t dynDataLoc;
 	int64_t* registers;
 
 };
