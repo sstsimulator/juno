@@ -31,7 +31,7 @@ SST::Component(id) {
     } else {
         output.verbose(CALL_INFO, 1, 0, "Successfully loaded memory interface.\n");
     }
-    
+
     bool init_link_success = mem->initialize("cache_link", new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent) );
     
     if( init_link_success ) {
@@ -151,6 +151,8 @@ void JunoCPU::handleEvent( SimpleMem::Request* ev ) {
 }
 
 void JunoCPU::init( unsigned int phase ) {
+    mem->init( phase );
+
     if( 0 == phase ) {
         const size_t initLen = static_cast<size_t>( progReader->getDataLength() + progReader->getInstLength() );
 
