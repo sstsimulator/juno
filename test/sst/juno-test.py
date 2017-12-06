@@ -13,7 +13,7 @@ max_addr_gb = 1
 # Define the simulation components
 comp_cpu = sst.Component("cpu", "juno.JunoCPU")
 comp_cpu.addParams({
-	"verbose" : 0,
+	"verbose" : 1,
 	"registers" : 16,
 	"program" : os.getenv("JUNO_EXE", "../asm/gups.bin"),
 	"clock" : "2.4GHz",
