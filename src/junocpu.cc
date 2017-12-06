@@ -31,7 +31,7 @@ SST::Component(id) {
     } else {
         output.verbose(CALL_INFO, 1, 0, "Successfully loaded memory interface.\n");
     }
-    
+
     bool init_link_success = mem->initialize("cache_link", new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent) );
     
     if( init_link_success ) {
@@ -92,7 +92,7 @@ SST::Component(id) {
     if( NULL != handlerSlot ) {
 	handlerSlot->createAll( subComps );
 
-	for( int i = 0; i < subComps.size(); ++i ) {
+	for( size_t i = 0; i < subComps.size(); ++i ) {
 		JunoCustomInstructionHandler* nextHandler = dynamic_cast<JunoCustomInstructionHandler*>( subComps[i] );
 
 		if( NULL != nextHandler ) {
@@ -151,17 +151,19 @@ void JunoCPU::handleEvent( SimpleMem::Request* ev ) {
 }
 
 void JunoCPU::init( unsigned int phase ) {
+    mem->init( phase );
+
     if( 0 == phase ) {
-        const int initLen = progReader->getDataLength() + progReader->getInstLength();
+        const size_t initLen = static_cast<size_t>( progReader->getDataLength() + progReader->getInstLength() );
 
         std::vector<uint8_t> exeImage;
         exeImage.reserve( initLen );
 
-        for( int i = 0; i < initLen; ++i ) {
+        for( size_t i = 0; i < initLen; ++i ) {
             exeImage.push_back( progReader->getBinaryBuffer()[i] );
         }
 
-	for( int i = 0; i < progReader->getPadding(); ++i ) {
+	for( size_t i = 0; i < progReader->getPadding(); ++i ) {
 	    exeImage.push_back( static_cast<uint8_t>(0) );
 	}
 
@@ -309,7 +311,7 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
                 default:
 		    int instStatus = 1;
 
-		    for( int i = 0; i < customHandlers.size(); ++i ) {
+		    for( size_t i = 0; i < customHandlers.size(); ++i ) {
 			if( customHandlers[i]->canProcessInst(nextInstOp) ) {
 				instStatus = customHandlers[i]->execute( &output, nextInst,
 					regFile, ldStUnit, &pc );
