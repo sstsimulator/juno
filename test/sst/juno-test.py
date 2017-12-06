@@ -8,15 +8,17 @@ sst.setProgramOption("stopAtCycle", "0s")
 # Tell SST what statistics handling we want
 sst.setStatisticLoadLevel(4)
 
+max_addr_gb = 1
+
 # Define the simulation components
 comp_cpu = sst.Component("cpu", "juno.JunoCPU")
 comp_cpu.addParams({
-	"verbose" : 1,
+	"verbose" : 0,
 	"registers" : 16,
 	"program" : os.getenv("JUNO_EXE", "../asm/gups.bin"),
 	"clock" : "2.4GHz",
 	"cycles-add" : 1,
-	"max-address" : 16 * 1024 * 1024 * 1024
+	"max-address" : max_addr_gb * 1024 * 1024 * 1024
 })
 
 # Define RAND support
@@ -41,7 +43,7 @@ comp_memory = sst.Component("memory", "memHierarchy.MemController")
 comp_memory.addParams({
       "coherence_protocol" : "MESI",
       "backend.access_time" : "10 ns",
-      "backend.mem_size" : "16GiB",
+      "backend.mem_size" : str(max_addr_gb) + "GiB",
       "clock" : "1GHz"
 })
 
