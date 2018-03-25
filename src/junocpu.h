@@ -66,7 +66,16 @@ namespace SST {
 				   { "cycles", "Cycles the CPU was active", "cycles", 1 },
 		  		   { "instructions", "Instructions executed by the CPU", "instructions", 1 },
 				   { "mem-reads", "Memory reads issued by the CPU", "instructions", 1 },
-				   { "mem-writes", "Memory writes issued by the CPU", "instructions", 1 }
+				   { "mem-writes", "Memory writes issued by the CPU", "instructions", 1 },
+				   { "add-ins-count", "ADD instructions issued by the CPU", "instructions", 1 },
+				   { "sub-ins-count", "SUB instructions issued by the CPU", "instructions", 1 },
+				   { "mul-ins-count", "MUL instructions issued by the CPU", "instructions", 1 },
+				   { "div-ins-count", "DIV instructions issued by the CPU", "instructions", 1 },
+				   { "mod-ins-count", "MOD instructions issued by the CPU", "instructions", 1 },
+				   { "and-ins-count", "AND instructions issued by the CPU", "instructions", 1 },
+				   { "or-ins-count", "OR instructions issued by the CPU", "instructions", 1 },
+				   { "xor-ins-count", "XOR instructions issued by the CPU", "instructions", 1 },
+				   { "not-ins-count", "NOT instructions issued by the CPU", "instructions", 1 }
 				   )
 
             SST_ELI_DOCUMENT_PORTS(
@@ -106,6 +115,16 @@ namespace SST {
 	    Statistic<uint64_t>* statInstructions;
             Statistic<uint64_t>* statMemReads;
             Statistic<uint64_t>* statMemWrites;
+
+	    Statistic<uint64_t>* statAddIns;
+	    Statistic<uint64_t>* statSubIns;
+	    Statistic<uint64_t>* statDivIns;
+	    Statistic<uint64_t>* statMulIns;
+	    Statistic<uint64_t>* statAndIns;
+	    Statistic<uint64_t>* statOrIns;
+	    Statistic<uint64_t>* statXorIns;
+	    Statistic<uint64_t>* statModIns;
+	    Statistic<uint64_t>* statNotIns;
 
 	    std::vector<JunoCustomInstructionHandler*> customHandlers;
         };

@@ -122,6 +122,16 @@ SST::Component(id) {
     statMemReads     = registerStatistic<uint64_t>( "mem-reads" );
     statMemWrites    = registerStatistic<uint64_t>( "mem-writes" );
 
+    statAddIns       = registerStatistic<uint64_t>( "add-ins-count" );
+    statSubIns       = registerStatistic<uint64_t>( "sub-ins-count" );
+    statDivIns       = registerStatistic<uint64_t>( "div-ins-count" );
+    statModIns       = registerStatistic<uint64_t>( "mod-ins-count" );
+    statMulIns       = registerStatistic<uint64_t>( "mul-ins-count" );
+    statAndIns       = registerStatistic<uint64_t>( "and-ins-count" );
+    statOrIns        = registerStatistic<uint64_t>( "or-ins-count" );
+    statXorIns       = registerStatistic<uint64_t>( "xor-ins-count" );
+    statNotIns       = registerStatistic<uint64_t>( "not-ins-count" );
+	
     output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
 
@@ -240,42 +250,49 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
                     executeAdd( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = addCycles;
+		    statAddIns->addData(1);
                     break;
 
                 case JUNO_SUB :
                     executeSub( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = subCycles;
+		    statSubIns->addData(1);
                     break;
 
                 case JUNO_MUL :
                     executeMul( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = mulCycles;
+		    statMulIns->addData(1);
                     break;
 
                 case JUNO_AND :
                     executeAnd( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = andCycles;
+		    statAndIns->addData(1);
                     break;
 
                 case JUNO_OR :
                     executeOr( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = subCycles;
+		    statOrIns->addData(1);
                     break;
 
                 case JUNO_XOR :
                     executeXor( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = xorCycles;
+		    statXorIns->addData(1);
                     break;
 
                 case JUNO_NOT :
 		    executeNot( output, nextInst, regFile );
                     pc += 4;
 		    instCyclesLeft = notCycles;
+		    statNotIns->addData(1);
                     break;
 
                 case JUNO_PCR_JUMP_ZERO:
@@ -294,12 +311,14 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
                     executeMod( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = modCycles;
+		    statModIns->addData(1);
                     break;
 
                 case JUNO_DIV :
                     executeDiv( output, nextInst, regFile );
                     pc += 4;
                     instCyclesLeft = divCycles;
+		    statDivIns->addData(1);
                     break;
 
                 case JUNO_NOOP :
