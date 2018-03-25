@@ -25,6 +25,18 @@ namespace SST {
             
             regFile->writeReg( resultReg, result );
         };
+
+        void executeNot( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
+            const uint8_t op        = inst->getReadReg1();
+            const uint8_t resultReg = inst->getWriteReg();
+
+            const int64_t val       = regFile->readReg(op);
+            const int64_t result    = ~(val);
+            output.verbose(CALL_INFO, 4, 0, "NOT[r%3" PRIu8 ", res=r%3" PRIu8 "]: (~%" PRId64 " = %" PRId64 ")\n",
+                           op, resultReg, val, result);
+
+            regFile->writeReg( resultReg, result );
+        };
         
         void executeSub( SST::Output& output, JunoCPUInstruction* inst, JunoRegisterFile* regFile ) {
             const uint8_t opLeft    = inst->getReadReg1();

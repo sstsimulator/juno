@@ -113,6 +113,7 @@ SST::Component(id) {
     andCycles = params.find<SST::Cycle_t>("cycles-and", 1);
     xorCycles = params.find<SST::Cycle_t>("cycles-xor", 1);
     orCycles  = params.find<SST::Cycle_t>("cycles-or", 1);
+    notCycles  = params.find<SST::Cycle_t>("cycles-not", 1);
 
     output.verbose(CALL_INFO, 1, 0, "Configuring statistics...\n");
 
@@ -185,7 +186,7 @@ void JunoCPU::finish() {
 bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
 
     statCycles->addData(1);
-    output.verbose(CALL_INFO, 2, 0, "Cycle: %" PRIu64 "\n", static_cast<uint64_t>(currentCycle));
+    output.verbose(CALL_INFO, 8, 0, "Cycle: %" PRIu64 "\n", static_cast<uint64_t>(currentCycle));
 
     bool handlersClear = true;
 
@@ -272,7 +273,9 @@ bool JunoCPU::clockTick( SST::Cycle_t currentCycle ) {
                     break;
 
                 case JUNO_NOT :
+		    executeNot( output, nextInst, regFile );
                     pc += 4;
+		    instCyclesLeft = notCycles;
                     break;
 
                 case JUNO_PCR_JUMP_ZERO:

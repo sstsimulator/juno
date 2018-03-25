@@ -58,6 +58,7 @@ namespace SST {
                                     { "cycles-and", "Cycles to spend on an AND operation", "1"},
                                     { "cycles-xor", "Cycles to spend on an XOR operation", "1"},
                                     { "cycles-or",  "Cycles to spend on an OR operation", "1"},
+                                    { "cycles-not",  "Cycles to spend on an NOT (bit flip) operation", "1"},
 				    { "max-address", "Set a maximum address that memory addresses are allowed to access (debugging mechanism)", "2147483647" }
                                     )
 
@@ -97,6 +98,7 @@ namespace SST {
             SST::Cycle_t orCycles;
             SST::Cycle_t xorCycles;
 	    SST::Cycle_t modCycles;
+	    SST::Cycle_t notCycles;
 
             SST::Output output;
 
