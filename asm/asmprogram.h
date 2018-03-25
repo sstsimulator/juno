@@ -180,6 +180,9 @@ public:
 				generateBinaryOperand( JUNO_OR, curOp, binaryOp );
 			} else if( curOp->getInstCode() == "XOR" ) {
 				generateBinaryOperand( JUNO_XOR, curOp, binaryOp );
+			} else if( curOp->getInstCode() == "NOT" ) {
+				// Yes, this uses the binaryOp array but it sets unused fields to zero
+				generateUnaryOperand( JUNO_NOT, curOp, binaryOp );
 //			} else if( curOp->getInstCode() == "JUMP" ) {
 //				generatePCRJump( JUNO_PCR_JUMP, curOp, binaryOp, static_cast<uint64_t>(i) );
 			} else if( curOp->getInstCode() == "JZERO" ) {
@@ -465,6 +468,43 @@ public:
 				populateBinaryOperand( curOp, &binaryOp[1] );
 	}
 
+	void generateUnaryOperand( const char junoCode, AssemblyOperation* curOp, char* binaryOp ) {
+				memcpy( (void*) &binaryOp[0], (void*) &junoCode, sizeof(junoCode) );
+
+				if( curOp->countOperands() != 2 ) {
+					fprintf(stderr, "Error: instruction (%s) must have two operands, it only has %d\n",
+						curOp->getInstCode().c_str(), curOp->countOperands());
+					exit(-1);
+				}
+
+				populateUnaryOperand( curOp, &binaryOp[1] );
+	}
+
+	void populateUnaryOperand( AssemblyOperation* curOp, char* unaryOp ) {
+		// Zero out the entire operand array, unused fields need to be set to zero
+		for(int j = 0;j < 3; j++) {
+			unaryOp[j] = 0;
+		}
+
+		for( int j = 0; j < 2; ++j ) {
+                	AssemblyOperand* curOperand = curOp->getOperand(j);
+
+                                        if( curOperand->getType() != REGISTER_OPERAND ) {
+                                                fprintf(stderr, "Error: %s operation only allows register operands, operand %d is not a register.\n",
+                                                        curOp->getInstCode().c_str(), j);
+                                        }
+
+                                        AssemblyRegisterOperand* curRegOperand = dynamic_cast<AssemblyRegisterOperand*>( curOperand );
+					const uint8_t reg = curRegOperand->getRegister();
+
+			if( j == 0 ) {
+                                        memcpy( (void*) &unaryOp[j], (void*) &reg, sizeof(char) );
+			} else if( j == 1 ) {
+                                        memcpy( (void*) &unaryOp[j+1], (void*) &reg, sizeof(char) );
+			}
+               }
+	}
+
 	void populateBinaryOperand( AssemblyOperation* curOp, char* binaryOp ) {
 		for( int j = 0; j < 3; ++j ) {
                 	AssemblyOperand* curOperand = curOp->getOperand(j);
@@ -480,6 +520,7 @@ public:
                                         memcpy( (void*) &binaryOp[j], (void*) &reg, sizeof(char) );
                                 }
 	}
+
 
 protected:
 	std::map<std::string, uint64_t> labelMap;
