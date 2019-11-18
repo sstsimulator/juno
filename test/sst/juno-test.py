@@ -41,10 +41,13 @@ comp_l1cache.addParams({
 
 comp_memory = sst.Component("memory", "memHierarchy.MemController")
 comp_memory.addParams({
-      "coherence_protocol" : "MESI",
-      "backend.access_time" : "10 ns",
-      "backend.mem_size" : str(max_addr_gb) + "GiB",
       "clock" : "1GHz"
+})
+
+backend = comp_memory.setSubComponent("backend", "memHierarchy.simpleMem")
+backend.addParams({
+    "access_time" : "10 ns",
+    "mem_size" : str(max_addr_gb) + "GiB",
 })
 
 sst.setStatisticOutput("sst.statOutputCSV")

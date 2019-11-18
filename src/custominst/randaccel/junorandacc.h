@@ -20,7 +20,6 @@
 
 #include <sst/core/link.h>
 #include <sst/core/component.h>
-#include <sst/core/elementinfo.h>
 #include <sst/core/rng/mersenne.h>
 
 #include "junogenrandev.h"

@@ -19,7 +19,6 @@
 #define _H_SST_JUNO_RAND_UNIT
 
 #include <sst/core/link.h>
-#include <sst/core/elementinfo.h>
 #include <sst/core/subcomponent.h>
 #include <sst/core/rng/mersenne.h>
 #include "custominst/junocustinst.h"
@@ -39,7 +38,8 @@ class JunoExternalRandInstructionHandler : public JunoCustomInstructionHandler {
 
 public:
 	JunoExternalRandInstructionHandler( Component* owner, Params& params );
-	~JunoExternalRandInstructionHandler();
+	JunoExternalRandInstructionHandler( ComponentId_t id, Params& params );
+        ~JunoExternalRandInstructionHandler();
 
 	// Return true if the op-code is either RAND or RSEED instructions
 	// that's all we can process in this unit
@@ -54,13 +54,13 @@ public:
 	bool isBusy();
 	void handleGenerateResp(SST::Event* ev);
 
-	SST_ELI_REGISTER_SUBCOMPONENT(
+	SST_ELI_REGISTER_SUBCOMPONENT_DERIVED(
 		JunoExternalRandInstructionHandler,
 		"juno",
 		"JunoExternalRandomHandler",
 		SST_ELI_ELEMENT_VERSION(1, 0, 0),
 		"Random number generation instruction handler that connects to an external random number generator for Juno",
-		"SST::Juno::CustomInstructionHandler"
+		SST::Juno::JunoCustomInstructionHandler
 		)
 
 	SST_ELI_DOCUMENT_PORTS(

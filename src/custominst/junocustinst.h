@@ -30,8 +30,11 @@ namespace Juno {
 class JunoCustomInstructionHandler : public SST::SubComponent {
 
 public:
+        SST_ELI_REGISTER_SUBCOMPONENT_API(SST::Juno::JunoCustomInstructionHandler)
+
 	JunoCustomInstructionHandler( Component* owner, Params& params ) : SubComponent(owner) {}
-	~JunoCustomInstructionHandler() {}
+	JunoCustomInstructionHandler( ComponentId_t id, Params& params) : SubComponent(id) {}
+        ~JunoCustomInstructionHandler() {}
 
 	virtual bool canProcessInst( const uint8_t opCode ) = 0;
 	virtual int  execute( SST::Output* output, JunoCPUInstruction* inst,

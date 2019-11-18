@@ -19,7 +19,6 @@
 
 #include <sst/core/sst_config.h>
 #include <sst/core/component.h>
-#include <sst/core/elementinfo.h>
 
 #include <sst/core/interfaces/simpleMem.h>
 
@@ -50,7 +49,7 @@ namespace SST {
             
             bool clockTick( SST::Cycle_t currentCycle );
             void handleEvent( SimpleMem::Request* ev );
-            
+
             SST_ELI_REGISTER_COMPONENT(
                                        JunoCPU,
                                        "juno",
@@ -99,8 +98,9 @@ namespace SST {
                                    )
 
 	    SST_ELI_DOCUMENT_SUBCOMPONENT_SLOTS(
-        		{"customhandler", "Holds customer instruction handlers",
-				"SST::Juno::CustomInstructionHandler" }
+                                    {"memory", "Interface to memory system", "SST::Interfaces::SimpleMem"},
+                                    {"customhandler", "Holds customer instruction handlers",
+			                	"SST::Juno::CustomInstructionHandler" }
     		)
 
         private:
@@ -110,6 +110,8 @@ namespace SST {
             JunoLoadStoreUnit* ldStUnit;
 	    int handlerCount;
             uint64_t pc;
+
+            TimeConverter* timeConverter;
 
             SimpleMem* mem;
 

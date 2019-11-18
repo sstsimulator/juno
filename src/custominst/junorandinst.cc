@@ -24,6 +24,18 @@
 using namespace SST::RNG;
 using namespace SST::Juno;
 
+JunoRandInstructionHandler::JunoRandInstructionHandler( ComponentId_t id, Params& params ) :
+		JunoCustomInstructionHandler( id, params ) {
+
+	const uint64_t rngSeed = params.find<uint64_t>("seed", 101010101);
+	rng = new MersenneRNG( rngSeed );
+
+	statRandCalls = registerStatistic<uint64_t>("calls-to-rand");
+	statRandSeedCalls = registerStatistic<uint64_t>("calls-to-rseed");
+
+	cyclesLeft = 0;
+}
+
 JunoRandInstructionHandler::JunoRandInstructionHandler( Component* owner, Params& params ) :
 		JunoCustomInstructionHandler( owner, params ) {
 

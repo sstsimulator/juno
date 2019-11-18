@@ -12,7 +12,6 @@ This is a warning only; your job will continue, though performance may be degrad
 --------------------------------------------------------------------------
 Juno[cpu:JunoCPU:0]: Loading memory interface: memHierarchy.memInterface ...
 Juno[cpu:JunoCPU:0]: Successfully loaded memory interface.
-Juno[cpu:JunoCPU:0]: Cache link (via SimpleMem) initialized successfully
 Juno[cpu:JunoCPU:0]: Opening program ../asm/sum.bin ...
 Juno[cpu:JunoProgramReader:0]: Application Version:      1000000
 Juno[cpu:JunoProgramReader:0]: Data Length:              16

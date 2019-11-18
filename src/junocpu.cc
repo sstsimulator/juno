@@ -36,30 +36,27 @@ SST::Component(id) {
     const int verbosity = params.find<int>("verbose", 0);
     output.init("Juno[" + getName() + ":@p:@t]: ", verbosity, 0, SST::Output::STDOUT);
     
-    std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.memInterface");
-    output.verbose(CALL_INFO, 1, 0, "Loading memory interface: %s ...\n", memIFace.c_str());
-    
-    Params interfaceParams = params.find_prefix_params("meminterface.");
-    mem = dynamic_cast<SimpleMem*>( loadSubComponent(memIFace, this, interfaceParams) );
-    
-    if( NULL == mem ) {
-        output.fatal(CALL_INFO, -1, "Error: unable to load %s memory interface.\n", memIFace.c_str());
-    } else {
-        output.verbose(CALL_INFO, 1, 0, "Successfully loaded memory interface.\n");
-    }
-
-    bool init_link_success = mem->initialize("cache_link", new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent) );
-    
-    if( init_link_success ) {
-        output.verbose(CALL_INFO, 1, 0, "Cache link (via SimpleMem) initialized successfully\n");
-    } else {
-        output.fatal(CALL_INFO, -1, "Cache link was not initialized successfully\n");
-    }
-    
     // Just register a plain clock for this simple example
     std::string cpuClock = params.find<std::string>("clock", "1GHz");
-    registerClock(cpuClock, new SST::Clock::Handler<JunoCPU>(this, &JunoCPU::clockTick));
+    timeConverter = registerClock(cpuClock, new SST::Clock::Handler<JunoCPU>(this, &JunoCPU::clockTick));
     
+    mem = loadUserSubComponent<Interfaces::SimpleMem>("memory", ComponentInfo::SHARE_NONE, timeConverter, new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
+    
+    // Load anonymously if not found in config
+    if (!mem) {
+        std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.memInterface");
+        output.verbose(CALL_INFO, 1, 0, "Loading memory interface: %s ...\n", memIFace.c_str());
+        Params interfaceParams = params.find_prefix_params("meminterface.");
+        interfaceParams.insert("port", "cache_link");
+
+        mem = loadAnonymousSubComponent<Interfaces::SimpleMem>(memIFace, "memory", 0, ComponentInfo::SHARE_PORTS | ComponentInfo::INSERT_STATS, interfaceParams, timeConverter, new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent)); 
+    
+        if( NULL == mem )
+            output.fatal(CALL_INFO, -1, "Error: unable to load %s memory interface.\n", memIFace.c_str());
+    }
+
+    output.verbose(CALL_INFO, 1, 0, "Successfully loaded memory interface.\n");
+
     // Tell SST to wait until we authorize it to exit
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();
@@ -106,15 +103,11 @@ SST::Component(id) {
     handlerCount = 0;
 
     if( NULL != handlerSlot ) {
-	handlerSlot->createAll( subComps );
-
-	for( size_t i = 0; i < subComps.size(); ++i ) {
-		JunoCustomInstructionHandler* nextHandler = dynamic_cast<JunoCustomInstructionHandler*>( subComps[i] );
-
-		if( NULL != nextHandler ) {
-			customHandlers.push_back(nextHandler);
-		}
-	}
+        for (int i = 0; i <= handlerSlot->getMaxPopulatedSlotNumber(); i++) {
+            if (handlerSlot->isPopulated(i)) {
+                customHandlers.push_back(handlerSlot->create<JunoCustomInstructionHandler>(i, ComponentInfo::SHARE_NONE));
+	    }
+        }
     }
 
     handlerCount = static_cast<int>(subComps.size());

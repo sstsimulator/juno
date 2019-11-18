@@ -26,6 +26,16 @@
 using namespace SST::RNG;
 using namespace SST::Juno;
 
+JunoExternalRandInstructionHandler::JunoExternalRandInstructionHandler( ComponentId_t id, Params& params ) :
+		JunoCustomInstructionHandler( id, params ), nextEvID(0), targetReg(0) {
+
+	randAccLink = configureLink( "genlink", "1ns", new Event::Handler<JunoExternalRandInstructionHandler>(
+		this, &JunoExternalRandInstructionHandler::handleGenerateResp));
+
+	statRandCalls = registerStatistic<uint64_t>("rand-calls");
+	statCyclesBusy = registerStatistic<uint64_t>("cycles-busy");
+}
+
 JunoExternalRandInstructionHandler::JunoExternalRandInstructionHandler( Component* owner, Params& params ) :
 		JunoCustomInstructionHandler( owner, params ), nextEvID(0), targetReg(0) {
 
