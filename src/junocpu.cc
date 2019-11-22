@@ -99,7 +99,6 @@ SST::Component(id) {
     output.verbose(CALL_INFO, 1, 0, "Loading custom instructions...\n");
 
     SubComponentSlotInfo* handlerSlot = getSubComponentSlotInfo("customhandler");
-    std::vector<SubComponent*> subComps;
     handlerCount = 0;
 
     if( NULL != handlerSlot ) {
@@ -110,7 +109,7 @@ SST::Component(id) {
         }
     }
 
-    handlerCount = static_cast<int>(subComps.size());
+    handlerCount = customHandlers.size();
     output.verbose(CALL_INFO, 1, 0, "Loaded %d custom instruction handlers.\n", handlerCount);
     output.verbose(CALL_INFO, 1, 0, "Loading operation cycle counts...\n");
 
