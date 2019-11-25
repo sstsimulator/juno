@@ -1,15 +1,3 @@
---------------------------------------------------------------------------
-WARNING: a request was made to bind a process. While the system
-supports binding the process itself, at least one node does NOT
-support binding memory to the process location.
-
-  Node:  sst-test
-
-This usually is due to not having the required NUMA support installed
-on the node. In some Linux distributions, the required support is
-contained in the libnumactl and libnumactl-devel packages.
-This is a warning only; your job will continue, though performance may be degraded.
---------------------------------------------------------------------------
 Juno[cpu:JunoCPU:0]: Loading memory interface: memHierarchy.memInterface ...
 Juno[cpu:JunoCPU:0]: Successfully loaded memory interface.
 Juno[cpu:JunoCPU:0]: Opening program ../asm/sum.bin ...
@@ -28,4 +16,4 @@ Juno[cpu:JunoCPU:0]: Configuring statistics...
 Juno[cpu:JunoCPU:0]: Initialization done.
 Juno[cpu:init:0]: Sending initialization data to memory...
 Juno[cpu:init:0]: Initialization data sent.
-Simulation is complete, simulated time: 125.118 us
+Simulation is complete, simulated time: 125.119 us
