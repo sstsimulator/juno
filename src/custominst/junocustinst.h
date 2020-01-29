@@ -30,9 +30,8 @@ namespace Juno {
 class JunoCustomInstructionHandler : public SST::SubComponent {
 
 public:
-        SST_ELI_REGISTER_SUBCOMPONENT_API(SST::Juno::JunoCustomInstructionHandler)
+    SST_ELI_REGISTER_SUBCOMPONENT_API(SST::Juno::JunoCustomInstructionHandler)
 
-	JunoCustomInstructionHandler( Component* owner, Params& params ) : SubComponent(owner) {}
 	JunoCustomInstructionHandler( ComponentId_t id, Params& params) : SubComponent(id) {}
         ~JunoCustomInstructionHandler() {}
 

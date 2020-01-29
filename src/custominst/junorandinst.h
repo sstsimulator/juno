@@ -36,9 +36,8 @@ namespace Juno {
 class JunoRandInstructionHandler : public JunoCustomInstructionHandler {
 
 public:
-	JunoRandInstructionHandler( Component* owner, Params& params );
-        JunoRandInstructionHandler( ComponentId_t id, Params& params );
-        ~JunoRandInstructionHandler();
+    JunoRandInstructionHandler( ComponentId_t id, Params& params );
+    ~JunoRandInstructionHandler();
 
 	// Return true if the op-code is either RAND or RSEED instructions
 	// that's all we can process in this unit
