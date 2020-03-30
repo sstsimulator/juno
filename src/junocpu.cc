@@ -1,8 +1,8 @@
-// Copyright 2013-2018 NTESS. Under the terms
+// Copyright 2013-2020 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2018, NTESS
+// Copyright (c) 2013-2020, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -35,13 +35,13 @@ JunoCPU::JunoCPU( SST::ComponentId_t id, SST::Params& params ) :
 SST::Component(id) {
     const int verbosity = params.find<int>("verbose", 0);
     output.init("Juno[" + getName() + ":@p:@t]: ", verbosity, 0, SST::Output::STDOUT);
-    
+
     // Just register a plain clock for this simple example
     std::string cpuClock = params.find<std::string>("clock", "1GHz");
     timeConverter = registerClock(cpuClock, new SST::Clock::Handler<JunoCPU>(this, &JunoCPU::clockTick));
-    
+
     mem = loadUserSubComponent<Interfaces::SimpleMem>("memory", ComponentInfo::SHARE_NONE, timeConverter, new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
-    
+
     // Load anonymously if not found in config
     if (!mem) {
         std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.memInterface");
@@ -49,8 +49,8 @@ SST::Component(id) {
         Params interfaceParams = params.find_prefix_params("meminterface.");
         interfaceParams.insert("port", "cache_link");
 
-        mem = loadAnonymousSubComponent<Interfaces::SimpleMem>(memIFace, "memory", 0, ComponentInfo::SHARE_PORTS | ComponentInfo::INSERT_STATS, interfaceParams, timeConverter, new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent)); 
-    
+        mem = loadAnonymousSubComponent<Interfaces::SimpleMem>(memIFace, "memory", 0, ComponentInfo::SHARE_PORTS | ComponentInfo::INSERT_STATS, interfaceParams, timeConverter, new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
+
         if( NULL == mem )
             output.fatal(CALL_INFO, -1, "Error: unable to load %s memory interface.\n", memIFace.c_str());
     }
@@ -60,30 +60,30 @@ SST::Component(id) {
     // Tell SST to wait until we authorize it to exit
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();
-    
+
     std::string progFile = params.find<std::string>("program", "");
-    
+
     if( "" == progFile ) {
         output.fatal(CALL_INFO, -1, "Error: program file was not specified, nothing to run!\n");
     }
-    
+
     output.verbose(CALL_INFO, 1, 0, "Opening program %s ...\n", progFile.c_str());
     FILE* progFileHandle = fopen(progFile.c_str(), "r");
-    
+
     if( NULL == progFileHandle ) {
         output.fatal(CALL_INFO, -1, "Error: unable to open program: %s\n", progFile.c_str());
     }
-    
+
     progReader = new JunoProgramReader( progFileHandle , &output );
-    
+
     fclose(progFileHandle);
-    
+
     output.verbose(CALL_INFO, 1, 0, "Creating an instruction manager...\n");
     instMgr = new JunoFixedPrgInstMgr( progReader->getBinaryBuffer(), (progReader->getDataLength() + progReader->getInstLength()) );
-    
+
     instCyclesLeft = 0;
     pc = progReader->getDataLength();
-    
+
     output.verbose(CALL_INFO, 1, 0, "PC set to: %" PRIu64 "\n", pc);
 
     int maxReg = params.find<int>("registers", "8");
@@ -139,7 +139,7 @@ SST::Component(id) {
     statOrIns        = registerStatistic<uint64_t>( "or-ins-count" );
     statXorIns       = registerStatistic<uint64_t>( "xor-ins-count" );
     statNotIns       = registerStatistic<uint64_t>( "not-ins-count" );
-	
+
     output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
 

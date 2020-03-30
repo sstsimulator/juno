@@ -1,8 +1,8 @@
-// Copyright 2013-2018 NTESS. Under the terms
+// Copyright 2013-2020 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2018, NTESS
+// Copyright (c) 2013-2020, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -35,18 +35,18 @@ using namespace SST::Juno;
 
 namespace SST {
     namespace Juno {
-        
+
         class JunoCPU : public SST::Component {
-            
+
         public:
             JunoCPU( SST::ComponentId_t id, SST::Params& params );
             ~JunoCPU();
-            
+
             void setup();
             void finish();
-            
+
             void init( unsigned int phase );
-            
+
             bool clockTick( SST::Cycle_t currentCycle );
             void handleEvent( SimpleMem::Request* ev );
 
@@ -58,7 +58,7 @@ namespace SST {
                                        "External programmable CPU for SST",
                                        COMPONENT_CATEGORY_PROCESSOR
                                        )
-            
+
             SST_ELI_DOCUMENT_PARAMS(
                                     { "printFrequency", "How frequently to print a message from the component", "5" },
                                     { "repeats", "Number of repetitions to make", "10" },
