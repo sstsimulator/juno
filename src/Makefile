@@ -29,6 +29,8 @@ libjuno.so: $(JUNO_OBJS) $(ASM_OBJS) $(INSTMGR_OBJS) $(CUSTOMINST_OBJS) $(RANDAC
 
 install:
 	sst-register juno juno_LIBDIR=$(CURDIR)
+	sst-register SST_ELEMENT_SOURCE juno=$(CURDIR)
+	sst-register SST_ELEMENT_TESTS  juno=$(CURDIR)/../tests
 
 clean:
 	rm -f *.o instmgr/*.o custominst/*.o libjuno.so
