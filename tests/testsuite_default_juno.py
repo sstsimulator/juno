@@ -110,7 +110,7 @@ class testcase_juno(SSTTestCase):
         juno_assembler_dir = "{0}/../asm/".format(test_path)
 
         # Build the juno assembler
-        cmd = "make -C {0} > /dev/null".format(juno_assembler_dir)
+        cmd = "make -C {0} > /dev/null 2>&1".format(juno_assembler_dir)
         cmd_rtn = os.system(cmd)
         build_success = cmd_rtn == 0
         self.assertTrue(build_success, "Juno Assembler failed to build properly; Makefile rtn = {0}".format(cmd_rtn))
