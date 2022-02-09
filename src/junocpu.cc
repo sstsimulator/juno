@@ -1,8 +1,8 @@
-// Copyright 2013-2021 NTESS. Under the terms
+// Copyright 2013-2022 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2021, NTESS
+// Copyright (c) 2013-2022, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -40,23 +40,26 @@ SST::Component(id) {
     std::string cpuClock = params.find<std::string>("clock", "1GHz");
     timeConverter = registerClock(cpuClock, new SST::Clock::Handler<JunoCPU>(this, &JunoCPU::clockTick));
 
-    mem = loadUserSubComponent<Interfaces::SimpleMem>("memory", ComponentInfo::SHARE_NONE, timeConverter, new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
+    mem = loadUserSubComponent<Interfaces::StandardMem>("memory", ComponentInfo::SHARE_NONE, timeConverter, new StandardMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
 
     // Load anonymously if not found in config
     if (!mem) {
-        std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.memInterface");
+        std::string memIFace = params.find<std::string>("meminterface", "memHierarchy.standardInterface");
         output.verbose(CALL_INFO, 1, 0, "Loading memory interface: %s ...\n", memIFace.c_str());
-        Params interfaceParams = params.find_prefix_params("meminterface.");
+        Params interfaceParams = params.get_scoped_params("meminterface");
         interfaceParams.insert("port", "cache_link");
 
-        mem = loadAnonymousSubComponent<Interfaces::SimpleMem>(memIFace, "memory", 0, ComponentInfo::SHARE_PORTS | ComponentInfo::INSERT_STATS, interfaceParams, timeConverter, new SimpleMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
+        mem = loadAnonymousSubComponent<Interfaces::StandardMem>(memIFace, "memory", 0, ComponentInfo::SHARE_PORTS | ComponentInfo::INSERT_STATS, 
+                interfaceParams, timeConverter, new StandardMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
 
         if( NULL == mem )
             output.fatal(CALL_INFO, -1, "Error: unable to load %s memory interface.\n", memIFace.c_str());
     }
 
     output.verbose(CALL_INFO, 1, 0, "Successfully loaded memory interface.\n");
-
+    
+    handlers = new MemHandlers(this, &output);
+    
     // Tell SST to wait until we authorize it to exit
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();
@@ -93,7 +96,7 @@ SST::Component(id) {
 
     output.verbose(CALL_INFO, 1, 0, "Creating load/store unit...\n");
 
-    uint64_t maxLoadStoreAddr = params.find<uint64_t>("max-address", std::numeric_limits<uint64_t>::max());
+    uint64_t maxLoadStoreAddr = params.find<uint64_t>("max_address", std::numeric_limits<uint64_t>::max());
     ldStUnit = new JunoLoadStoreUnit( &output, mem, regFile, maxLoadStoreAddr );
 
     output.verbose(CALL_INFO, 1, 0, "Loading custom instructions...\n");
@@ -113,32 +116,32 @@ SST::Component(id) {
     output.verbose(CALL_INFO, 1, 0, "Loaded %d custom instruction handlers.\n", handlerCount);
     output.verbose(CALL_INFO, 1, 0, "Loading operation cycle counts...\n");
 
-    addCycles = params.find<SST::Cycle_t>("cycles-add", 1);
-    subCycles = params.find<SST::Cycle_t>("cycles-sub", 1);
-    mulCycles = params.find<SST::Cycle_t>("cycles-mul", 1);
-    divCycles = params.find<SST::Cycle_t>("cycles-div", 1);
-    modCycles = params.find<SST::Cycle_t>("cycles-mod", 1);
-    andCycles = params.find<SST::Cycle_t>("cycles-and", 1);
-    xorCycles = params.find<SST::Cycle_t>("cycles-xor", 1);
-    orCycles  = params.find<SST::Cycle_t>("cycles-or", 1);
-    notCycles  = params.find<SST::Cycle_t>("cycles-not", 1);
+    addCycles = params.find<SST::Cycle_t>("cycles_add", 1);
+    subCycles = params.find<SST::Cycle_t>("cycles_sub", 1);
+    mulCycles = params.find<SST::Cycle_t>("cycles_mul", 1);
+    divCycles = params.find<SST::Cycle_t>("cycles_div", 1);
+    modCycles = params.find<SST::Cycle_t>("cycles_mod", 1);
+    andCycles = params.find<SST::Cycle_t>("cycles_and", 1);
+    xorCycles = params.find<SST::Cycle_t>("cycles_xor", 1);
+    orCycles  = params.find<SST::Cycle_t>("cycles_or", 1);
+    notCycles = params.find<SST::Cycle_t>("cycles_not", 1);
 
     output.verbose(CALL_INFO, 1, 0, "Configuring statistics...\n");
 
     statCycles       = registerStatistic<uint64_t>( "cycles" );
     statInstructions = registerStatistic<uint64_t>( "instructions" );
-    statMemReads     = registerStatistic<uint64_t>( "mem-reads" );
-    statMemWrites    = registerStatistic<uint64_t>( "mem-writes" );
+    statMemReads     = registerStatistic<uint64_t>( "mem_reads" );
+    statMemWrites    = registerStatistic<uint64_t>( "mem_writes" );
 
-    statAddIns       = registerStatistic<uint64_t>( "add-ins-count" );
-    statSubIns       = registerStatistic<uint64_t>( "sub-ins-count" );
-    statDivIns       = registerStatistic<uint64_t>( "div-ins-count" );
-    statModIns       = registerStatistic<uint64_t>( "mod-ins-count" );
-    statMulIns       = registerStatistic<uint64_t>( "mul-ins-count" );
-    statAndIns       = registerStatistic<uint64_t>( "and-ins-count" );
-    statOrIns        = registerStatistic<uint64_t>( "or-ins-count" );
-    statXorIns       = registerStatistic<uint64_t>( "xor-ins-count" );
-    statNotIns       = registerStatistic<uint64_t>( "not-ins-count" );
+    statAddIns       = registerStatistic<uint64_t>( "add_ins_count" );
+    statSubIns       = registerStatistic<uint64_t>( "sub_ins_count" );
+    statDivIns       = registerStatistic<uint64_t>( "div_ins_count" );
+    statModIns       = registerStatistic<uint64_t>( "mod_ins_count" );
+    statMulIns       = registerStatistic<uint64_t>( "mul_ins_count" );
+    statAndIns       = registerStatistic<uint64_t>( "and_ins_count" );
+    statOrIns        = registerStatistic<uint64_t>( "or_ins_count" );
+    statXorIns       = registerStatistic<uint64_t>( "xor_ins_count" );
+    statNotIns       = registerStatistic<uint64_t>( "not_ins_count" );
 
     output.verbose(CALL_INFO, 1, 0, "Initialization done.\n");
 }
@@ -146,28 +149,33 @@ SST::Component(id) {
 JunoCPU::~JunoCPU() {
     delete progReader;
     delete regFile;
-    delete mem;
+    delete handlers;
 }
 
-void JunoCPU::handleEvent( SimpleMem::Request* ev ) {
+void JunoCPU::handleEvent( StandardMem::Request* ev ) {
     output.verbose(CALL_INFO, 4, 0, "Recv response from cache\n");
-
-    if( ev->cmd == Interfaces::SimpleMem::Request::Command::ReadResp ) {
-        // Read request needs some special handling
-        uint8_t regTarget = ldStUnit->lookupEntry( ev->id );
-        int64_t newValue = 0;
-
-        memcpy( (void*) &newValue, &ev->data[0], sizeof(newValue) );
-        output.verbose(CALL_INFO, 8, 0, "Response to a read, payload=%" PRId64 ", for reg: %" PRIu8 "\n", newValue, regTarget);
-        regFile->writeReg(regTarget, newValue);
-    }
-
-    ldStUnit->removeEntry( ev->id );
+    
+    ev->handle(handlers);
+    ldStUnit->removeEntry( ev->getID() );
 
     // Need to clean up the events coming back from the cache
     delete ev;
     output.verbose(CALL_INFO, 4, 0, "Complete cache response handling.\n");
 }
+
+/* Handler for incoming Read responses */
+void JunoCPU::MemHandlers::handle(SST::Interfaces::StandardMem::ReadResp* rsp) {
+    // Read request needs some special handling
+    uint8_t regTarget = cpu->ldStUnit->lookupEntry( rsp->getID());
+    int64_t newValue = 0;
+
+    memcpy( (void*) &newValue, &rsp->data[0], sizeof(newValue) );
+    out->verbose(CALL_INFO, 8, 0, "Response to a read, payload=%" PRId64 ", for reg: %" PRIu8 "\n", newValue, regTarget);
+    cpu->regFile->writeReg(regTarget, newValue);
+}
+
+/* Handler for incoming Write responses */
+void JunoCPU::MemHandlers::handle(SST::Interfaces::StandardMem::WriteResp* rsp) { }
 
 void JunoCPU::init( unsigned int phase ) {
     mem->init( phase );
@@ -186,10 +194,10 @@ void JunoCPU::init( unsigned int phase ) {
 	    exeImage.push_back( static_cast<uint8_t>(0) );
 	}
 
-        SimpleMem::Request* writeExe = new SimpleMem::Request(SimpleMem::Request::Write, 0, exeImage.size(), exeImage);
+        StandardMem::Write* writeExe = new StandardMem::Write(0, exeImage.size(), exeImage);
         output.verbose(CALL_INFO, 1, 0, "Sending initialization data to memory...\n");
 
-        mem->sendInitData(writeExe);
+        mem->sendUntimedData(writeExe);
 
         output.verbose(CALL_INFO, 1, 0, "Initialization data sent.\n");
     }

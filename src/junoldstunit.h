@@ -1,8 +1,8 @@
-// Copyright 2013-2021 NTESS. Under the terms
+// Copyright 2013-2022 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2021, NTESS
+// Copyright (c) 2013-2022, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -18,7 +18,7 @@
 #ifndef _H_SST_JUNO_LD_ST_UNIT
 #define _H_SST_JUNO_LD_ST_UNIT
 
-#include <sst/core/interfaces/simpleMem.h>
+#include <sst/core/interfaces/stdMem.h>
 #include <map>
 
 #include "junoregfile.h"
@@ -31,16 +31,16 @@ namespace SST {
         class JunoLoadStoreEntry {
 
         public:
-            JunoLoadStoreEntry( const SimpleMem::Request::id_t reqID, uint8_t regTgt ) :
+            JunoLoadStoreEntry( const StandardMem::Request::id_t reqID, uint8_t regTgt ) :
             	id(reqID), regTarget(regTgt) {}
 
             ~JunoLoadStoreEntry() {}
 
             uint8_t getRegister() { return regTarget; }
-            SimpleMem::Request::id_t getID() { return id; }
+            StandardMem::Request::id_t getID() { return id; }
 
         protected:
-            SimpleMem::Request::id_t id;
+            StandardMem::Request::id_t id;
             uint8_t regTarget;
 
         };
@@ -48,7 +48,7 @@ namespace SST {
         class JunoLoadStoreUnit {
 
         public:
-            JunoLoadStoreUnit( SST::Output* out, SimpleMem* smMem, JunoRegisterFile* rFile, const uint64_t maxAddress ) :
+            JunoLoadStoreUnit( SST::Output* out, StandardMem* smMem, JunoRegisterFile* rFile, const uint64_t maxAddress ) :
             output(out), mem(smMem), regFile(rFile), maxAddr(maxAddress) {}
 
             bool operationsPending() {
@@ -64,12 +64,12 @@ namespace SST {
 				addr, maxAddr);
 		}
 
-                SimpleMem::Request* req = new SimpleMem::Request(SimpleMem::Request::Read, addr, 8);
+                StandardMem::Read* req = new StandardMem::Read(addr, 8);
 
-                JunoLoadStoreEntry* entry = new JunoLoadStoreEntry( req->id, reg );
+                JunoLoadStoreEntry* entry = new JunoLoadStoreEntry( req->getID(), reg );
                 addEntry( entry );
 
-                mem->sendRequest( req );
+                mem->send( req );
             }
 
             void createStoreRequest( uint64_t addr, uint8_t reg ) {
@@ -81,26 +81,25 @@ namespace SST {
 				addr, maxAddr);
 		}
 
-                SimpleMem::Request* req = new SimpleMem::Request(SimpleMem::Request::Write, addr, 8);
-
                 std::vector<uint8_t> payload;
                 payload.resize(8);
                 int64_t regValue = regFile->readReg( reg );
 
                 memcpy( (void*) &payload[0], (void*) &regValue, sizeof(regValue) );
-                req->setPayload( payload );
 
-                JunoLoadStoreEntry* entry = new JunoLoadStoreEntry( req->id, reg );
+                StandardMem::Write* req = new StandardMem::Write(addr, 8, payload);
+                
+                JunoLoadStoreEntry* entry = new JunoLoadStoreEntry( req->getID(), reg );
                 addEntry( entry );
 
-                mem->sendRequest( req );
+                mem->send( req );
             }
 
             void addEntry( JunoLoadStoreEntry* entry ) {
-                pending.insert( std::pair<SimpleMem::Request::id_t, JunoLoadStoreEntry*>( entry->getID(), entry ) );
+                pending.insert( std::pair<StandardMem::Request::id_t, JunoLoadStoreEntry*>( entry->getID(), entry ) );
             }
 
-            uint8_t lookupEntry( SimpleMem::Request::id_t id ) {
+            uint8_t lookupEntry( StandardMem::Request::id_t id ) {
                 auto entry = pending.find( id );
 
                 if( entry == pending.end() ) {
@@ -111,7 +110,7 @@ namespace SST {
                 return entry->second->getRegister();
             }
 
-            void removeEntry( SimpleMem::Request::id_t id ) {
+            void removeEntry( StandardMem::Request::id_t id ) {
                 auto entry = pending.find( id );
 
                 if( entry != pending.end() ) {
@@ -121,9 +120,9 @@ namespace SST {
 
         private:
             SST::Output* output;
-            SimpleMem* mem;
+            StandardMem* mem;
             JunoRegisterFile* regFile;
-            std::map<SimpleMem::Request::id_t, JunoLoadStoreEntry*> pending;
+            std::map<StandardMem::Request::id_t, JunoLoadStoreEntry*> pending;
             uint64_t maxAddr;
         };
 

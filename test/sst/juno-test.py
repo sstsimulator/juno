@@ -17,8 +17,8 @@ comp_cpu.addParams({
 	"registers" : 16,
 	"program" : os.getenv("JUNO_EXE", "../asm/gups.bin"),
 	"clock" : "2.4GHz",
-	"cycles-add" : 1,
-	"max-address" : max_addr_gb * 1024 * 1024 * 1024
+	"cycles_add" : 1,
+	"max_address" : max_addr_gb * 1024 * 1024 * 1024
 })
 
 # Define RAND support

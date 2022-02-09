@@ -1,8 +1,8 @@
-// Copyright 2013-2021 NTESS. Under the terms
+// Copyright 2013-2022 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2021, NTESS
+// Copyright (c) 2013-2022, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -81,7 +81,7 @@ public:
 
 					int index = -1;
 
-					for( int j = 0; j < int64Literals.size(); ++j ) {
+					for( size_t j = 0; j < int64Literals.size(); ++j ) {
 						if( litVal == int64Literals[j] ) {
 							index = j;
 							break;
@@ -167,13 +167,13 @@ public:
 		fwrite( &literalSize, sizeof(literalSize), 1, binary );
 		fwrite( &programSize, sizeof(programSize), 1, binary );
 
-		for( int i = 0; i < int64Literals.size(); ++i ) {
+		for( size_t i = 0; i < int64Literals.size(); ++i ) {
 			fwrite( &int64Literals[i], sizeof(int64_t), 1, binary );
 		}
 
 		char binaryOp[4];
 
-		for( int i = 0; i < op->size(); ++i ) {
+		for( size_t i = 0; i < op->size(); ++i ) {
 			for( int j = 0; j < 4; ++j ) {
 				binaryOp[j] = 0;
 			}
@@ -228,7 +228,7 @@ public:
 				memcpy( (void*) &binaryOp[2], (void*)& zero, sizeof(zero) );
 				memcpy( (void*) &binaryOp[3], (void*)& zero, sizeof(zero) );
 			} else {
-				fprintf(stderr, "Unknown instruction code: %s at instruction index: %d\n",
+				fprintf(stderr, "Unknown instruction code: %s at instruction index: %zu\n",
 					curOp->getInstCode().c_str(), i);
 				exit(-1);
 			}
@@ -349,11 +349,11 @@ public:
                 }
 
                 AssemblyLiteralOperand* litOp = dynamic_cast<AssemblyLiteralOperand*>(curOp->getOperand(0));
-                uint64_t litVal  = static_cast<uint64_t>( litOp->getLiteral() );
+                int64_t litVal  = litOp->getLiteral();
 
 		int index = -1;
 
-		for( int i = 0; i < int64Literals.size(); ++i ) {
+		for( size_t i = 0; i < int64Literals.size(); ++i ) {
 			if(int64Literals[i] == litVal) {
 				index = i;
 				break;
@@ -393,11 +393,11 @@ public:
 		}
 
 		AssemblyLiteralOperand* litOp = dynamic_cast<AssemblyLiteralOperand*>(curOp->getOperand(1));
-                uint64_t litVal  = static_cast<uint64_t>( litOp->getLiteral() );
+                int64_t litVal  = litOp->getLiteral();
 
 		int index = -1;
 
-		for( int i = 0; i < int64Literals.size(); ++i ) {
+		for( size_t i = 0; i < int64Literals.size(); ++i ) {
 			if(int64Literals[i] == litVal) {
 				index = i;
 				break;

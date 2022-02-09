@@ -1,8 +1,8 @@
-// Copyright 2013-2021 NTESS. Under the terms
+// Copyright 2013-2022 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2021, NTESS
+// Copyright (c) 2013-2022, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -30,8 +30,8 @@ JunoRandInstructionHandler::JunoRandInstructionHandler( ComponentId_t id, Params
 	const uint64_t rngSeed = params.find<uint64_t>("seed", 101010101);
 	rng = new MersenneRNG( rngSeed );
 
-	statRandCalls = registerStatistic<uint64_t>("calls-to-rand");
-	statRandSeedCalls = registerStatistic<uint64_t>("calls-to-rseed");
+	statRandCalls = registerStatistic<uint64_t>("calls_to_rand");
+	statRandSeedCalls = registerStatistic<uint64_t>("calls_to_rseed");
 
 	cyclesLeft = 0;
 }

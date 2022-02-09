@@ -1,8 +1,8 @@
-// Copyright 2013-2021 NTESS. Under the terms
+// Copyright 2013-2022 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2021, NTESS
+// Copyright (c) 2013-2022, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -65,8 +65,8 @@ public:
     		)
 
 	SST_ELI_DOCUMENT_STATISTICS(
-		{ "calls-to-rand", "Number of times the RAND instruction is called", "calls", 1 },
-		{ "calls-to-rseed", "Number of times the RSEED instruction is called", "calls", 1 }
+		{ "calls_to_rand", "Number of times the RAND instruction is called", "calls", 1 },
+		{ "calls_to_rseed", "Number of times the RSEED instruction is called", "calls", 1 }
 		)
 
 private:

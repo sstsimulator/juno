@@ -1,8 +1,8 @@
-// Copyright 2013-2021 NTESS. Under the terms
+// Copyright 2013-2022 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2021, NTESS
+// Copyright (c) 2013-2022, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -20,7 +20,7 @@
 #include <sst/core/sst_config.h>
 #include <sst/core/component.h>
 
-#include <sst/core/interfaces/simpleMem.h>
+#include <sst/core/interfaces/stdMem.h>
 
 #include "junoldstunit.h"
 #include "junoprogreader.h"
@@ -48,7 +48,19 @@ namespace SST {
             void init( unsigned int phase );
 
             bool clockTick( SST::Cycle_t currentCycle );
-            void handleEvent( SimpleMem::Request* ev );
+            void handleEvent( StandardMem::Request* ev );
+
+            class MemHandlers : public Interfaces::StandardMem::RequestHandler {
+            public:
+                friend class JunoCPU;
+
+                MemHandlers(JunoCPU* cpu, SST::Output* out) : Interfaces::StandardMem::RequestHandler(out), cpu(cpu) {}
+                virtual ~MemHandlers() {}
+                virtual void handle(Interfaces::StandardMem::ReadResp* resp) override;
+                virtual void handle(Interfaces::StandardMem::WriteResp* resp) override;
+
+                JunoCPU* cpu;
+            };
 
             SST_ELI_REGISTER_COMPONENT(
                                        JunoCPU,
@@ -65,32 +77,32 @@ namespace SST {
                                     { "program", "The assembly file to run.", "" },
                                     { "verbose", "Sets the verbosity level of output.", "0" },
                                     { "clock", "Clock for the CPU", "1GHz" },
-                                    { "cycles-add", "Cycles to spend on an ADD operation", "1"},
-                                    { "cycles-sub", "Cycles to spend on an SUB operation", "1"},
-                                    { "cycles-mul", "Cycles to spend on an MUL operation", "2"},
-                                    { "cycles-div", "Cycles to spend on an DIV operation", "6"},
-                                    { "cycles-mod", "Cycles to spend on an MOD operation", "6"},
-                                    { "cycles-and", "Cycles to spend on an AND operation", "1"},
-                                    { "cycles-xor", "Cycles to spend on an XOR operation", "1"},
-                                    { "cycles-or",  "Cycles to spend on an OR operation", "1"},
-                                    { "cycles-not",  "Cycles to spend on an NOT (bit flip) operation", "1"},
-				    { "max-address", "Set a maximum address that memory addresses are allowed to access (debugging mechanism)", "2147483647" }
+                                    { "cycles_add", "Cycles to spend on an ADD operation", "1"},
+                                    { "cycles_sub", "Cycles to spend on an SUB operation", "1"},
+                                    { "cycles_mul", "Cycles to spend on an MUL operation", "2"},
+                                    { "cycles_div", "Cycles to spend on an DIV operation", "6"},
+                                    { "cycles_mod", "Cycles to spend on an MOD operation", "6"},
+                                    { "cycles_and", "Cycles to spend on an AND operation", "1"},
+                                    { "cycles_xor", "Cycles to spend on an XOR operation", "1"},
+                                    { "cycles_or",  "Cycles to spend on an OR operation", "1"},
+                                    { "cycles_not",  "Cycles to spend on an NOT (bit flip) operation", "1"},
+				    { "max_address", "Set a maximum address that memory addresses are allowed to access (debugging mechanism)", "2147483647" }
                                     )
 
 	    SST_ELI_DOCUMENT_STATISTICS(
 				   { "cycles", "Cycles the CPU was active", "cycles", 1 },
 		  		   { "instructions", "Instructions executed by the CPU", "instructions", 1 },
-				   { "mem-reads", "Memory reads issued by the CPU", "instructions", 1 },
-				   { "mem-writes", "Memory writes issued by the CPU", "instructions", 1 },
-				   { "add-ins-count", "ADD instructions issued by the CPU", "instructions", 1 },
-				   { "sub-ins-count", "SUB instructions issued by the CPU", "instructions", 1 },
-				   { "mul-ins-count", "MUL instructions issued by the CPU", "instructions", 1 },
-				   { "div-ins-count", "DIV instructions issued by the CPU", "instructions", 1 },
-				   { "mod-ins-count", "MOD instructions issued by the CPU", "instructions", 1 },
-				   { "and-ins-count", "AND instructions issued by the CPU", "instructions", 1 },
-				   { "or-ins-count", "OR instructions issued by the CPU", "instructions", 1 },
-				   { "xor-ins-count", "XOR instructions issued by the CPU", "instructions", 1 },
-				   { "not-ins-count", "NOT instructions issued by the CPU", "instructions", 1 }
+				   { "mem_reads", "Memory reads issued by the CPU", "instructions", 1 },
+				   { "mem_writes", "Memory writes issued by the CPU", "instructions", 1 },
+				   { "add_ins_count", "ADD instructions issued by the CPU", "instructions", 1 },
+				   { "sub_ins_count", "SUB instructions issued by the CPU", "instructions", 1 },
+				   { "mul_ins_count", "MUL instructions issued by the CPU", "instructions", 1 },
+				   { "div_ins_count", "DIV instructions issued by the CPU", "instructions", 1 },
+				   { "mod_ins_count", "MOD instructions issued by the CPU", "instructions", 1 },
+				   { "and_ins_count", "AND instructions issued by the CPU", "instructions", 1 },
+				   { "or_ins_count", "OR instructions issued by the CPU", "instructions", 1 },
+				   { "xor_ins_count", "XOR instructions issued by the CPU", "instructions", 1 },
+				   { "not_ins_count", "NOT instructions issued by the CPU", "instructions", 1 }
 				   )
 
             SST_ELI_DOCUMENT_PORTS(
@@ -98,7 +110,7 @@ namespace SST {
                                    )
 
 	    SST_ELI_DOCUMENT_SUBCOMPONENT_SLOTS(
-                                    {"memory", "Interface to memory system", "SST::Interfaces::SimpleMem"},
+                                    {"memory", "Interface to memory system", "SST::Interfaces::StandardMem"},
                                     {"customhandler", "Holds customer instruction handlers",
 			                	"SST::Juno::CustomInstructionHandler" }
     		)
@@ -113,8 +125,8 @@ namespace SST {
 
             TimeConverter* timeConverter;
 
-            SimpleMem* mem;
-
+            StandardMem* mem;
+            MemHandlers* handlers;
             SST::Cycle_t instCyclesLeft;
 
             SST::Cycle_t addCycles;

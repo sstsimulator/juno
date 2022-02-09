@@ -1,8 +1,8 @@
-// Copyright 2013-2021 NTESS. Under the terms
+// Copyright 2013-2022 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2021, NTESS
+// Copyright (c) 2013-2022, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -32,8 +32,8 @@ JunoExternalRandInstructionHandler::JunoExternalRandInstructionHandler( Componen
 	randAccLink = configureLink( "genlink", "1ns", new Event::Handler<JunoExternalRandInstructionHandler>(
 		this, &JunoExternalRandInstructionHandler::handleGenerateResp));
 
-	statRandCalls = registerStatistic<uint64_t>("rand-calls");
-	statCyclesBusy = registerStatistic<uint64_t>("cycles-busy");
+	statRandCalls = registerStatistic<uint64_t>("rand_calls");
+	statCyclesBusy = registerStatistic<uint64_t>("cycles_busy");
 }
 
 JunoExternalRandInstructionHandler::~JunoExternalRandInstructionHandler() {
