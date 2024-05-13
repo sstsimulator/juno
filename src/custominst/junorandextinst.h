@@ -53,7 +53,7 @@ public:
 	bool isBusy();
 	void handleGenerateResp(SST::Event* ev);
 
-	SST_ELI_REGISTER_SUBCOMPONENT_DERIVED(
+	SST_ELI_REGISTER_SUBCOMPONENT(
 		JunoExternalRandInstructionHandler,
 		"juno",
 		"JunoExternalRandomHandler",

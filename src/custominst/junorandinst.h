@@ -51,7 +51,7 @@ public:
 		uint64_t* pc );
 	bool isBusy();
 
-	SST_ELI_REGISTER_SUBCOMPONENT_DERIVED(
+	SST_ELI_REGISTER_SUBCOMPONENT(
 		JunoRandInstructionHandler,
 		"juno",
 		"JunoRandomHandler",
