@@ -1,8 +1,8 @@
-// Copyright 2013-2024 NTESS. Under the terms
+// Copyright 2013-2025 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2024, NTESS
+// Copyright (c) 2013-2025, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -34,8 +34,8 @@ JunoRandAccelerator::JunoRandAccelerator(SST::ComponentId_t id, SST::Params& par
 	rng = new MersenneRNG( rngSeed );
 
 	output->verbose(CALL_INFO, 1, 0, "Creating link to CPU...\n");
-	cpuLink = configureLink("cpulink", "1ns", new Event::Handler<JunoRandAccelerator>(
-			this, &JunoRandAccelerator::handleGenerateReq));
+	cpuLink = configureLink("cpulink", "1ns", new Event::Handler2<JunoRandAccelerator,
+			&JunoRandAccelerator::handleGenerateReq>(this));
 
 	if( NULL == cpuLink ) {
 		output->fatal(CALL_INFO, -1, "Error: unable to configure link for CPU.\n");
@@ -45,7 +45,7 @@ JunoRandAccelerator::JunoRandAccelerator(SST::ComponentId_t id, SST::Params& par
 
 	output->verbose(CALL_INFO, 1, 0, "Creating an internal link for timing random generation (timing=%s)...\n", genLinkTime.c_str());
 	selfGenerateLink = configureSelfLink("genlink", genLinkTime,
-		new Event::Handler<JunoRandAccelerator>(this, &JunoRandAccelerator::handleRNGenerated));
+		new Event::Handler2<JunoRandAccelerator, &JunoRandAccelerator::handleRNGenerated>(this));
 
 	if( NULL == selfGenerateLink ) {
 		output->fatal(CALL_INFO, -1, "Error: unable to create self link for timing.\n");

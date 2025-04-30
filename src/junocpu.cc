@@ -1,8 +1,8 @@
-// Copyright 2013-2024 NTESS. Under the terms
+// Copyright 2013-2025 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2013-2024, NTESS
+// Copyright (c) 2013-2025, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -38,9 +38,9 @@ SST::Component(id) {
 
     // Just register a plain clock for this simple example
     std::string cpuClock = params.find<std::string>("clock", "1GHz");
-    timeConverter = registerClock(cpuClock, new SST::Clock::Handler<JunoCPU>(this, &JunoCPU::clockTick));
+    timeConverter = registerClock(cpuClock, new SST::Clock::Handler2<JunoCPU, &JunoCPU::clockTick>(this));
 
-    mem = loadUserSubComponent<Interfaces::StandardMem>("memory", ComponentInfo::SHARE_NONE, timeConverter, new StandardMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
+    mem = loadUserSubComponent<Interfaces::StandardMem>("memory", ComponentInfo::SHARE_NONE, &timeConverter, new StandardMem::Handler2<JunoCPU, &JunoCPU::handleEvent>(this));
 
     // Load anonymously if not found in config
     if (!mem) {
@@ -50,7 +50,7 @@ SST::Component(id) {
         interfaceParams.insert("port", "cache_link");
 
         mem = loadAnonymousSubComponent<Interfaces::StandardMem>(memIFace, "memory", 0, ComponentInfo::SHARE_PORTS | ComponentInfo::INSERT_STATS, 
-                interfaceParams, timeConverter, new StandardMem::Handler<JunoCPU>(this, &JunoCPU::handleEvent));
+                interfaceParams, &timeConverter, new StandardMem::Handler2<JunoCPU, &JunoCPU::handleEvent>(this));
 
         if( NULL == mem )
             output.fatal(CALL_INFO, -1, "Error: unable to load %s memory interface.\n", memIFace.c_str());
