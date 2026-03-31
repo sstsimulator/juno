@@ -40,7 +40,7 @@ SST::Component(id) {
     std::string cpuClock = params.find<std::string>("clock", "1GHz");
     timeConverter = registerClock(cpuClock, new SST::Clock::Handler2<JunoCPU, &JunoCPU::clockTick>(this));
 
-    mem = loadUserSubComponent<Interfaces::StandardMem>("memory", ComponentInfo::SHARE_NONE, &timeConverter, new StandardMem::Handler2<JunoCPU, &JunoCPU::handleEvent>(this));
+    mem = loadUserSubComponent<Interfaces::StandardMem>("memory", ComponentInfo::SHARE_NONE, timeConverter, new StandardMem::Handler2<JunoCPU, &JunoCPU::handleEvent>(this));
 
     // Load anonymously if not found in config
     if (!mem) {
@@ -50,7 +50,7 @@ SST::Component(id) {
         interfaceParams.insert("port", "cache_link");
 
         mem = loadAnonymousSubComponent<Interfaces::StandardMem>(memIFace, "memory", 0, ComponentInfo::SHARE_PORTS | ComponentInfo::INSERT_STATS, 
-                interfaceParams, &timeConverter, new StandardMem::Handler2<JunoCPU, &JunoCPU::handleEvent>(this));
+                interfaceParams, timeConverter, new StandardMem::Handler2<JunoCPU, &JunoCPU::handleEvent>(this));
 
         if( NULL == mem )
             output.fatal(CALL_INFO, -1, "Error: unable to load %s memory interface.\n", memIFace.c_str());
