@@ -94,8 +94,8 @@ class testcase_juno(SSTTestCase):
         out_cmd = 'grep "Simulation is complete" {0}'.format(outfile)
         ref_cmd = 'grep "Simulation is complete" {0}'.format(reffile)
 
-        out_cmd_rtn = os_simple_command(out_cmd)
-        ref_cmd_rtn = os_simple_command(ref_cmd)
+        out_cmd_rtn = os_command(out_cmd)
+        ref_cmd_rtn = os_command(ref_cmd)
         log_debug("out_cmd_rtn = {0}\n".format(out_cmd_rtn))
         log_debug("ref_cmd_rtn = {0}\n".format(ref_cmd_rtn))
         cmd_result = out_cmd_rtn[1] == ref_cmd_rtn[1]
