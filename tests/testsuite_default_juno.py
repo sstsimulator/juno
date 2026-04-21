@@ -98,9 +98,9 @@ class testcase_juno(SSTTestCase):
         ref_cmd_rtn = os_command(ref_cmd).run()
         log_debug("out_cmd_rtn = {0}\n".format(out_cmd_rtn))
         log_debug("ref_cmd_rtn = {0}\n".format(ref_cmd_rtn))
-        cmd_result = out_cmd_rtn[1] == ref_cmd_rtn[1]
+        cmd_result = out_cmd_rtn.result() == ref_cmd_rtn.result()
 
-        self.assertTrue(cmd_result, "Juno Test; Output found line {0} does not match Ref found line {1}".format(out_cmd_rtn[1], ref_cmd_rtn[1]))
+        self.assertTrue(cmd_result, "Juno Test; Output found line {0} does not match Ref found line {1}".format(out_cmd_rtn.result(), ref_cmd_rtn.result()))
 
 ####
 
