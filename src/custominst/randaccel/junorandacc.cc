@@ -34,7 +34,7 @@ JunoRandAccelerator::JunoRandAccelerator(SST::ComponentId_t id, SST::Params& par
 	rng = new MersenneRNG( rngSeed );
 
 	output->verbose(CALL_INFO, 1, 0, "Creating link to CPU...\n");
-	cpuLink = configureLink("cpulink", "1ns", new Event::Handler2<JunoRandAccelerator,
+	cpuLink = configureLink("cpulink", "1ns", new Event::Handler<JunoRandAccelerator,
 			&JunoRandAccelerator::handleGenerateReq>(this));
 
 	if( NULL == cpuLink ) {
@@ -45,7 +45,7 @@ JunoRandAccelerator::JunoRandAccelerator(SST::ComponentId_t id, SST::Params& par
 
 	output->verbose(CALL_INFO, 1, 0, "Creating an internal link for timing random generation (timing=%s)...\n", genLinkTime.c_str());
 	selfGenerateLink = configureSelfLink("genlink", genLinkTime,
-		new Event::Handler2<JunoRandAccelerator, &JunoRandAccelerator::handleRNGenerated>(this));
+		new Event::Handler<JunoRandAccelerator, &JunoRandAccelerator::handleRNGenerated>(this));
 
 	if( NULL == selfGenerateLink ) {
 		output->fatal(CALL_INFO, -1, "Error: unable to create self link for timing.\n");
