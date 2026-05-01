@@ -88,7 +88,6 @@ AssemblyProgram* AssemblyReader::assemble() {
 	#define JUNO_MAX_LINE_LEN 2048
 
 	char* buffer = (char*) malloc( sizeof(char) * JUNO_MAX_LINE_LEN );
-	int currentLine = 1;
 
 	while( readLine(buffer, JUNO_MAX_LINE_LEN) ) {
 		printf("Line[%s]\n", buffer);
@@ -142,8 +141,6 @@ AssemblyProgram* AssemblyReader::assemble() {
 				}
 			}
 		}
-
-		currentLine++;
 	}
 
 	free(buffer);
